@@ -16,8 +16,8 @@ import { API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('camelo@email.com');
+  const [password, setPassword] = useState('Camelo');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -29,33 +29,21 @@ const Login = ({ navigation }) => {
 
       setLoading(true);
 
-			console.log('Dados enviados:', { email, password });
-
       const response = await axios.post(`${API_URL}/login`, {
         email,
         password
       });
 
-			console.log('Resposta:', response.data); // Debug
-
 			// Armazena o token e dados do usuário
       await AsyncStorage.setItem('@auth_token', response.data.token);
       await AsyncStorage.setItem('@user_data', JSON.stringify(response.data.user));
 
+			// redireciona para a tela home
       if (response.data) {
         setEmail('');
         setPassword('');
         navigation.navigate('Home');
       }
-
-			Alert.alert(
-        'Sucesso', 
-        response.data.message,
-        [{
-          text: 'OK',
-          onPress: () => navigation.navigate('Home')
-        }]
-      );
 
     } catch (error) {
 			console.log('Erro completo:', error);

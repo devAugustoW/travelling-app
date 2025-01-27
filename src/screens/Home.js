@@ -97,9 +97,11 @@ const Home = () => {
 				console.log('Erro ao buscar dados do usuário:', error);
 			}
 		};
-	
+
 		getUserData();
 	}, []);
+
+
 
   return (
     <SafeAreaView style={styles.container}>

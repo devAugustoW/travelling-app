@@ -1,23 +1,26 @@
 import React from 'react';
 import { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
 import * as Camera from 'expo-camera';
-import GetStart from '../screens/GetStart.js';
-import Register from '../screens/Register.js';
-import Login from '../screens/Login.js';
-import Home from '../screens/Home.js';
-import CreateAlbum from '../screens/CreateAlbum.js';
-import UserProfile from '../screens/UserProfile.js';
+import GetStart from '../screens/GetStart';
+import Register from '../screens/Register';
+import Login from '../screens/Login';
+import Home from '../screens/Home';
+import CreateAlbum from '../screens/CreateAlbum';
+import UserProfile from '../screens/UserProfile';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+
 // navegação bottom
 const TabNavigator = () => {
 	const [activeTab, setActiveTab] = useState('HomeTab');
+	const navigation = useNavigation();
 
 	// funcionalidade de camera
 	const openCamera = async () => {
@@ -90,7 +93,6 @@ const TabNavigator = () => {
           tabPress: () => setActiveTab('HomeTab'),
         }}
       />
-
 			<Tab.Screen 
         name="Camera" 
         component={Home} // componente Home é simbólico
@@ -114,8 +116,8 @@ const TabNavigator = () => {
       />
 
 			<Tab.Screen 
-        name="CreateAlbum" 
-        component={CreateAlbum}
+        name="CreateAlbumTab" 
+        component={Home}
         options={{
           tabBarIcon: ({ }) => (
             <Feather 
@@ -126,9 +128,12 @@ const TabNavigator = () => {
           tabBarLabel: '',
         }}
 				listeners={{
-          tabPress: () => setActiveTab('CreateAlbum'),
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('CreateAlbum');
+          },
         }}
-      />	
+      />
 
 			<Tab.Screen 
         name="UserProfile" 
@@ -155,10 +160,17 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="GetStart" component={GetStart} />
-				<Stack.Screen name="Register" component={Register} />
-				<Stack.Screen name="Login" component={Login} />				
-				<Stack.Screen name="Home" component={TabNavigator} />
+				<Stack.Screen name="GetStart" component={GetStart} />
+        <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Home" component={TabNavigator} />
+        <Stack.Screen 
+          name="CreateAlbum" 
+          component={CreateAlbum}
+          options={{
+            presentation: 'fullScreenModal'
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

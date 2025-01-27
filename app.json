@@ -25,7 +25,15 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "O Travelling precisa da sua localização para criar o álbum.",
+          "locationAlwaysPermission": "O Travelling precisa da sua localização para criar o álbum.",
+          "locationWhenInUsePermission": "O Travelling precisa da sua localização para criar o álbum."
+        }
+      ]
     ]
   }
 }

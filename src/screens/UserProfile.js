@@ -18,10 +18,12 @@ const UserProfile = () => {
   });
 	const [loading, setLoading] = useState(false);
 
+	// resgata os dados do usuário ao carregar a tela
   useEffect(() => {
     loadUserData();
   }, []);
 
+	// resgata os dados no AsyncStorage
   const loadUserData = async () => {
     try {
       const userDataString = await AsyncStorage.getItem('@user_data');

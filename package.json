@@ -24,7 +24,8 @@
     "react-native-screens": "~4.4.0",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@expo/vector-icons": "^14.0.2",
-    "expo-camera": "~16.0.14"
+    "expo-camera": "~16.0.14",
+    "expo-location": "~18.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

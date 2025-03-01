@@ -21,6 +21,7 @@ const Login = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+
     try {
       if (!email.trim() || !password.trim()) {
         Alert.alert('Erro', 'Por favor, preencha todos os campos');

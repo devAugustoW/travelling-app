@@ -107,6 +107,7 @@ const CreateAlbum = () => {
     }
   };
 
+	// criar álbum
 	const handleCreateAlbum = async () => {
     try {
       // Pega o token do AsyncStorage
@@ -160,6 +161,8 @@ const CreateAlbum = () => {
 
 			console.log('Dados enviados:', albumData);
 
+			console.log('API_URL:', API_URL);
+
       // Faz a requisição para criar o álbum
       const response = await axios.post(
         `${API_URL}/albums`,
@@ -170,6 +173,8 @@ const CreateAlbum = () => {
           }
         }
       );
+
+			console.log('Resposta da API:', response.data);
 
       Alert.alert(
         'Sucesso',
@@ -190,9 +195,9 @@ const CreateAlbum = () => {
                 description: '',
                 hasArrived: false
               });
-              // Volta para a Home
-              navigation.navigate('HomeTab');
-            }
+              // Navega para a tela Album
+              navigation.navigate('Album', { albumId: response.data.album._id });
+      			}
           }
         ]
       );

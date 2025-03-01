@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   View, 
   Text, 
@@ -6,20 +7,62 @@ import {
   SafeAreaView, 
   ScrollView, 
   TouchableOpacity,
-  Image 
+  Image,
+  Alert
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
+import axios from 'axios';
+import { API_URL } from '@env';
 
 const Album = ({ route }) => {
-  const { album } = route.params;
+  const { albumId } = route.params;
+  const [album, setAlbum] = useState(null);
+
+  useEffect(() => {
+    const fetchAlbumData = async () => {
+      try {
+				// Pega o token do AsyncStorage
+				const token = await AsyncStorage.getItem('@auth_token');
+				if (!token) {
+					Alert.alert('Erro', 'Você precisa estar logado');
+					return;
+				}
+	
+				// Faz a requisição para buscar os dados do álbum
+				const response = await axios.get(`${API_URL}/albums/${albumId}`, {
+					headers: {
+						'Authorization': `Bearer ${token}`
+					}
+				});
+				setAlbum(response.data);
+			} catch (error) {
+				console.log('Erro ao buscar dados do álbum:', error);
+				Alert.alert('Erro', 'Não foi possível carregar os dados do álbum.');
+			}
+		};
+	
+		fetchAlbumData();
+	}, [albumId]);
+
+  if (!album) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.loadingText}>Carregando...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+				contentContainerStyle={styles.scrollViewContent}
+				showsVerticalScrollIndicator={false}
+				
+			>
         {/* Área da capa */}
-        {album?.cover ? (
+        {album.cover ? (
           <Image 
             source={{ uri: album.cover }} 
             style={styles.coverImage}
@@ -27,8 +70,10 @@ const Album = ({ route }) => {
           />
         ) : (
           <LinearGradient
-            colors={['#031F2B', '#5EDFFF']}
-            style={styles.coverGradient}
+						colors={['#031F2B', '#042A38', '#5EDFFF']} 
+						start={{ x: 0.5, y: 0 }}
+						end={{ x: 0.5, y: 2 }}
+						style={styles.coverGradient}
           />
         )}
 
@@ -37,19 +82,19 @@ const Album = ({ route }) => {
           <View style={styles.infoItem}>
             <Feather name="trending-up" size={24} color="#5EDFFF" />
             <Text style={styles.infoTitle}>Dificuldade</Text>
-            <Text style={styles.infoText}>{album?.difficulty || 'N/A'}</Text>
+            <Text style={styles.infoText}>{album.difficulty || 'N/A'}</Text>
           </View>
 
           <View style={styles.infoItem}>
             <Feather name="clock" size={24} color="#5EDFFF" />
             <Text style={styles.infoTitle}>Tempo de Viagem</Text>
-            <Text style={styles.infoText}>{album?.timeTravel || 'N/A'}</Text>
+            <Text style={styles.infoText}>{album.timeTravel || 'N/A'}</Text>
           </View>
 
           <View style={styles.infoItem}>
             <Feather name="tag" size={24} color="#5EDFFF" />
             <Text style={styles.infoTitle}>Ticket</Text>
-            <Text style={styles.infoText}>{album?.cost || 'N/A'}</Text>
+            <Text style={styles.infoText}>{album.cost || 'N/A'}</Text>
           </View>
         </View>
 
@@ -58,33 +103,35 @@ const Album = ({ route }) => {
 
         {/* Sobre */}
         <View style={styles.aboutContainer}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <Text style={styles.description}>{album?.description || 'Sem descrição'}</Text>
+          <Text style={styles.sectionTitle}>Sobre</Text>
+          <Text style={styles.description}>{album.description || 'Sem descrição'}</Text>
         </View>
 
         {/* Separador */}
         <View style={styles.separator} />
 
         {/* Mapa */}
-        <View style={styles.mapContainer}>
-          <Text style={styles.sectionTitle}>No mapa</Text>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: album?.location?.latitude || -22.9068,
-              longitude: album?.location?.longitude || -43.1729,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-          >
-            <Marker
-              coordinate={{
-                latitude: album?.location?.latitude || -22.9068,
-                longitude: album?.location?.longitude || -43.1729,
-              }}
-            />
-          </MapView>
-        </View>
+        {album.location && album.location.latitude && album.location.longitude && (
+					<View style={styles.mapContainer}>
+						<Text style={styles.sectionTitle}>No mapa</Text>
+						<MapView
+							style={styles.map}
+							initialRegion={{
+								latitude: album.location.latitude,
+								longitude: album.location.longitude,
+								latitudeDelta: 0.01,
+								longitudeDelta: 0.01,
+							}}
+						>
+							<Marker
+								coordinate={{
+									latitude: album.location.latitude,
+									longitude: album.location.longitude,
+								}}
+							/>
+						</MapView>
+					</View>
+				)}
 
         {/* Botões */}
         <View style={styles.buttonContainer}>
@@ -107,13 +154,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#031F2B',
   },
+	scrollViewContent: {
+		flexGrow: 1,
+		justifyContent: 'space-between',
+	},
+  loadingText: {
+    color: '#FFF',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20,
+  },
   coverImage: {
     width: '100%',
-    height: 200,
+    height: 300,
   },
   coverGradient: {
     width: '100%',
-    height: 200,
+    height: 300,
+		borderBottomLeftRadius: 30,
+		borderBottomRightRadius: 30,
   },
   infoContainer: {
     flexDirection: 'row',
@@ -167,7 +226,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 20,
-    paddingBottom: 40,
+		backgroundColor: '#031F2B',
   },
   tripMapButton: {
     flexDirection: 'row',

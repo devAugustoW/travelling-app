@@ -1,7 +1,11 @@
 import React from 'react';
+import axios from 'axios';
+import { API_URL } from '@env';
+import { useState, useEffect } from 'react';
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useState, useEffect } from 'react';
+
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
@@ -16,8 +20,12 @@ import {
 } from 'react-native';
 
 const Home = () => {
+	const navigation = useNavigation();
 	const [userData, setUserData] = useState(null);
 	const [activeFilter, setActiveFilter] = useState('1');
+	const [userAlbums, setUserAlbums] = useState([]);
+  const [loading, setLoading] = useState(true);
+	
 
   const filters = [
     { id: '1', name: 'Forest', label: 'Floresta' },
@@ -84,7 +92,7 @@ const Home = () => {
     
   ];
 
-	// recupera os dados do usuário
+	// recupera os dados no AsyncStorage
 	useEffect(() => {
 		const getUserData = async () => {
 			try {
@@ -101,6 +109,29 @@ const Home = () => {
 		getUserData();
 	}, []);
 
+	// Busca os álbuns do usuário
+  const fetchUserAlbums = async () => {
+    try {
+      const token = await AsyncStorage.getItem('@auth_token');
+      
+      const response = await axios.get(`${API_URL}/user/albums`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      setUserAlbums(response.data.albums);
+      setLoading(false);
+    } catch (error) {
+      console.log('Erro ao buscar álbuns:', error);
+      setLoading(false);
+    }
+  };
+
+	// Busca os dados quando o componente monta
+	useEffect(() => {
+		fetchUserAlbums();
+	}, []);
 
 
   return (
@@ -178,23 +209,35 @@ const Home = () => {
 
 				{/* Melhores destinos */}
 				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Melhores Destinos</Text>
-					{featuredPhotos.map((photo) => (
-						<TouchableOpacity key={photo.id} style={styles.featuredCard}>
-							<Image source={photo.image} style={styles.featuredImage} />
-							<View style={styles.featuredInfo}>
-								<View>
-									<Text style={styles.featuredTitle}>{photo.title}</Text>
-									<Text style={styles.featuredLocation}>{photo.location}</Text>
-								</View>
-								<View style={styles.ratingContainer}>
-									<Text style={styles.rating}>{photo.rating}</Text>
-									<MaterialIcons name="star" size={24} color="#FFD700" />
-								</View>
-							</View>
-						</TouchableOpacity>
-					))}
-				</View>
+          <Text style={styles.sectionTitle}>Melhores Destinos</Text>
+          {userAlbums.map((album) => (
+            <TouchableOpacity 
+              key={album._id} 
+              style={styles.featuredCard}
+              onPress={() => navigation.navigate('Album', { album })}
+            >
+              <Image 
+                source={
+                  album.cover?.imageUrl 
+                    ? { uri: album.cover.imageUrl }
+                    : require('../assets/images/placeholder.png')
+                } 
+                style={styles.featuredImage} 
+                resizeMode="contain"
+              />
+              <View style={styles.featuredInfo}>
+                <View>
+									<Text style={styles.featuredTitle}>{album.title}</Text>
+									<Text style={styles.featuredDestination}>{album.destination}</Text>
+                </View>
+                <View style={styles.ratingContainer}>
+                  <Text style={styles.rating}>{album.grade || '0.0'}</Text>
+                  <MaterialIcons name="star" size={24} color="#FFD700" />
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -204,6 +247,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#031F2B',
+		paddingBottom: 50,
   },
   header: {
     flexDirection: 'row',
@@ -321,11 +365,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
 		position: 'relative',
-		marginBottom: 30,
+		marginBottom: 5,
   },
   featuredImage: {
     width: '100%',
-    height: 200,
+    height: 150,
+		cover: 'contain',
     borderRadius: 8,
   },
   featuredInfo: {
@@ -338,17 +383,17 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		left: 0,
   },
-  featuredTitle: {
+	featuredDestination: {
     color: '#FFF',
     fontFamily: 'Poppins-SemiBold',
     fontSize: 18,
   },
-  featuredLocation: {
+	featuredTitle: {
     color: '#ffffff',
     fontFamily: 'Poppins-Regular',
     fontSize: 14,
-		marginTop: -5,
-  },
+		marginTop: -10,
+  },  
   ratingContainer: {
 		flexDirection: 'row',
 		gap: 5,

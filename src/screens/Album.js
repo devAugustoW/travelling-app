@@ -146,22 +146,24 @@ const Album = ({ route }) => {
         {album.location && album.location.latitude && album.location.longitude && (
 					<View style={styles.mapContainer}>
 						<Text style={styles.sectionTitle}>No mapa</Text>
-						<MapView
-							style={styles.map}
-							initialRegion={{
-								latitude: album.location.latitude,
-								longitude: album.location.longitude,
-								latitudeDelta: 0.01,
-								longitudeDelta: 0.01,
-							}}
-						>
-							<Marker
-								coordinate={{
+						<View style={styles.mapWrapper}>
+							<MapView
+								style={styles.map}
+								initialRegion={{
 									latitude: album.location.latitude,
 									longitude: album.location.longitude,
+									latitudeDelta: 0.25,
+									longitudeDelta: 0.25,
 								}}
-							/>
-						</MapView>
+							>
+								<Marker
+									coordinate={{
+										latitude: album.location.latitude,
+										longitude: album.location.longitude,
+									}}
+								/>
+							</MapView>
+						</View>
 					</View>
 				)}
 
@@ -261,10 +263,14 @@ const styles = StyleSheet.create({
   mapContainer: {
     padding: 20,
   },
+	mapWrapper: {
+		borderRadius: 10,
+		overflow: 'hidden',
+	},
   map: {
     width: '100%',
-    height: 200,
-    borderRadius: 8,
+    height: 400,
+    borderRadius: 20,
   },
   buttonContainer: {
     flexDirection: 'row',

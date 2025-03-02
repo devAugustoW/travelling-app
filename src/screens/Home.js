@@ -162,8 +162,7 @@ const Home = () => {
 				</View>
 
 				{/* Filtro */}
-				<FlatList
-					horizontal
+				<FlatList horizontal
 					showsHorizontalScrollIndicator={false}
 					data={filters}
 					keyExtractor={(item) => item.id}
@@ -214,7 +213,7 @@ const Home = () => {
             <TouchableOpacity 
               key={album._id} 
               style={styles.featuredCard}
-              onPress={() => navigation.navigate('Album', { album })}
+              onPress={() => navigation.navigate('Album', { albumId: album._id })}
             >
               <Image 
                 source={
@@ -320,7 +319,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
     fontFamily: 'Poppins-SemiBold',
-    marginBottom: 15,
+    marginBottom: 5,
   },
 	albumList: {
     marginLeft: -20,  

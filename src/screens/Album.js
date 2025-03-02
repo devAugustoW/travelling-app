@@ -39,6 +39,12 @@ const Album = ({ route }) => {
 					}
 				});
 				setAlbum(response.data);
+
+				// Atualiza o estado de localização capturada
+				if (response.data.location) {
+					setLocationCaptured(true);
+				}
+
 			} catch (error) {
 				console.log('Erro ao buscar dados do álbum:', error);
 				Alert.alert('Erro', 'Não foi possível carregar os dados do álbum.');

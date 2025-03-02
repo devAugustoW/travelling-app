@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { 
   View, 
@@ -21,6 +22,7 @@ const Album = ({ route }) => {
   const { albumId } = route.params;
   const [album, setAlbum] = useState(null);
 	const [locationCaptured, setLocationCaptured] = useState(false);
+	const navigation = useNavigation();
 
 	// busca os dados do álbum
   useEffect(() => {
@@ -40,10 +42,6 @@ const Album = ({ route }) => {
 					}
 				});
 				setAlbum(response.data);
-
-				// Verifica se os dados do álbum estão corretos
-				console.log('Título do Álbum:', response.data.title);
-				console.log('Nota do Álbum:', response.data.grade);
 
 				// Atualiza o estado de localização capturada
 				if (response.data.location) {
@@ -185,7 +183,7 @@ const Album = ({ route }) => {
         <View style={styles.buttonContainer}>
 					<TouchableOpacity 
             style={styles.tripMapButton}
-            onPress={handleCheckIn} // Adiciona a função ao botão
+            onPress={handleCheckIn} 
           >
             <Feather name="map" size={20} color="#5EDFFF" />
             <Text style={styles.buttonText}>
@@ -193,7 +191,8 @@ const Album = ({ route }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.photoButton}>
+          <TouchableOpacity style={styles.photoButton}
+						onPress={() => navigation.navigate('NewPhoto')}>
             <Text style={[styles.buttonText, styles.photoButtonText]}>Foto</Text>
           </TouchableOpacity>
         </View>

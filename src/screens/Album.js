@@ -22,6 +22,7 @@ const Album = ({ route }) => {
   const [album, setAlbum] = useState(null);
 	const [locationCaptured, setLocationCaptured] = useState(false);
 
+	// busca os dados do álbum
   useEffect(() => {
     const fetchAlbumData = async () => {
       try {
@@ -39,6 +40,10 @@ const Album = ({ route }) => {
 					}
 				});
 				setAlbum(response.data);
+
+				// Verifica se os dados do álbum estão corretos
+				console.log('Título do Álbum:', response.data.title);
+				console.log('Nota do Álbum:', response.data.grade);
 
 				// Atualiza o estado de localização capturada
 				if (response.data.location) {
@@ -62,6 +67,7 @@ const Album = ({ route }) => {
     );
   }
 
+	// função para capturar a localização
 	const handleCheckIn = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -85,23 +91,31 @@ const Album = ({ route }) => {
       <ScrollView 
 				contentContainerStyle={styles.scrollViewContent}
 				showsVerticalScrollIndicator={false}
-				
 			>
         {/* Área da capa */}
-        {album.cover ? (
-					<Image 
-						source={{ uri: album.cover }} 
-						style={styles.coverImage}
-						resizeMode="cover"
-					/>
-				) : (
-					<LinearGradient
-						colors={['#031F2B', '#042A38', '#5EDFFF']} 
-						start={{ x: 0.5, y: 0 }}
-						end={{ x: 0.5, y: 2 }}
-						style={styles.coverGradient}
-					/>
-				)}
+				<View style={{ position: 'relative' }}>
+					{album.cover ? (
+						<Image 
+							source={{ uri: album.cover }} 
+							style={styles.coverImage}
+							resizeMode="cover"
+						/>
+					) : (
+						<LinearGradient
+							colors={['#031F2B', '#1B3B4D', '#5EDFFF']}
+							start={{ x: 0.5, y: 0 }}
+							end={{ x: 0.5, y: 2 }}
+							style={styles.coverGradient}
+						/>
+					)}
+					<View style={styles.coverOverlay}>
+						<Text style={styles.albumTitle}>{album.title}</Text>
+						<View style={styles.ratingContainer}>
+							<Text style={styles.albumGrade}>{album.grade || '0.0'}</Text>
+							<Feather name="star" size={24} color="#FFD700" />
+						</View>
+					</View>
+				</View>
 
         {/* Ícones de informação */}
         <View style={styles.infoContainer}>
@@ -212,6 +226,32 @@ const styles = StyleSheet.create({
     height: 300,
 		borderBottomLeftRadius: 30,
 		borderBottomRightRadius: 30,
+  },
+	coverOverlay: {
+		position: 'absolute',
+    bottom: 10,
+    left: 10,
+    right: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 8,
+		zIndex: 100,
+	},
+	albumTitle: {
+    color: '#FFF',
+    fontSize: 18,
+    fontFamily: 'Poppins-Medium',
+  },
+  albumGrade: {
+    color: '#FFF',
+    fontSize: 18,
+    fontFamily: 'Poppins-Medium',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+		columnGap: 5,
   },
   infoContainer: {
     flexDirection: 'row',

@@ -161,8 +161,6 @@ const CreateAlbum = () => {
 
 			console.log('Dados enviados:', albumData);
 
-			console.log('API_URL:', API_URL);
-
       // Faz a requisição para criar o álbum
       const response = await axios.post(
         `${API_URL}/albums`,
@@ -518,7 +516,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 30,
-    marginBottom: 60,
+    marginBottom: 0,
   },
   createButton: {
     flex: 1,

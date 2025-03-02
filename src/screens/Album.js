@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from 'expo-location';
 import { 
   View, 
   Text, 
@@ -19,6 +20,7 @@ import { API_URL } from '@env';
 const Album = ({ route }) => {
   const { albumId } = route.params;
   const [album, setAlbum] = useState(null);
+	const [locationCaptured, setLocationCaptured] = useState(false);
 
   useEffect(() => {
     const fetchAlbumData = async () => {
@@ -54,6 +56,24 @@ const Album = ({ route }) => {
     );
   }
 
+	const handleCheckIn = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permissão negada', 'Permissão para acessar localização foi negada.');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      console.log('Localização capturada:', location);
+      setLocationCaptured(true); 
+
+    } catch (error) {
+      console.log('Erro ao capturar localização:', error);
+      Alert.alert('Erro', 'Não foi possível capturar a localização.');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView 
@@ -63,38 +83,44 @@ const Album = ({ route }) => {
 			>
         {/* Área da capa */}
         {album.cover ? (
-          <Image 
-            source={{ uri: album.cover }} 
-            style={styles.coverImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <LinearGradient
+					<Image 
+						source={{ uri: album.cover }} 
+						style={styles.coverImage}
+						resizeMode="cover"
+					/>
+				) : (
+					<LinearGradient
 						colors={['#031F2B', '#042A38', '#5EDFFF']} 
 						start={{ x: 0.5, y: 0 }}
 						end={{ x: 0.5, y: 2 }}
 						style={styles.coverGradient}
-          />
-        )}
+					/>
+				)}
 
         {/* Ícones de informação */}
         <View style={styles.infoContainer}>
           <View style={styles.infoItem}>
-            <Feather name="trending-up" size={24} color="#5EDFFF" />
+						<View style={styles.iconBackground}>
+							<Feather name="trending-up" size={24} color="#5EDFFF" />
+						</View>
             <Text style={styles.infoTitle}>Dificuldade</Text>
-            <Text style={styles.infoText}>{album.difficulty || 'N/A'}</Text>
+            <Text style={styles.infoText}>{album.difficulty || <Text>N/A</Text>}</Text>
           </View>
 
           <View style={styles.infoItem}>
-            <Feather name="clock" size={24} color="#5EDFFF" />
+					<View style={styles.iconBackground}>
+      			<Feather name="clock" size={24} color="#5EDFFF" />
+    			</View>
             <Text style={styles.infoTitle}>Tempo de Viagem</Text>
-            <Text style={styles.infoText}>{album.timeTravel || 'N/A'}</Text>
+            <Text style={styles.infoText}>{album.timeTravel || <Text>N/A</Text>}</Text>
           </View>
 
           <View style={styles.infoItem}>
-            <Feather name="tag" size={24} color="#5EDFFF" />
+					<View style={styles.iconBackground}>
+						<Feather name="tag" size={24} color="#5EDFFF" />
+					</View>
             <Text style={styles.infoTitle}>Ticket</Text>
-            <Text style={styles.infoText}>{album.cost || 'N/A'}</Text>
+            <Text style={styles.infoText}>{album.cost || <Text>N/A</Text>}</Text>
           </View>
         </View>
 
@@ -135,9 +161,14 @@ const Album = ({ route }) => {
 
         {/* Botões */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.tripMapButton}>
+					<TouchableOpacity 
+            style={styles.tripMapButton}
+            onPress={handleCheckIn} // Adiciona a função ao botão
+          >
             <Feather name="map" size={20} color="#5EDFFF" />
-            <Text style={styles.buttonText}>Trip Map</Text>
+            <Text style={styles.buttonText}>
+              {locationCaptured ? 'Trip Map' : 'Check In'} 
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.photoButton}>
@@ -181,6 +212,13 @@ const styles = StyleSheet.create({
   },
   infoItem: {
     alignItems: 'center',
+  },
+	iconBackground: {
+    backgroundColor: '#263238',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   infoTitle: {
     color: '#FFF',

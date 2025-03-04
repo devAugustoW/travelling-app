@@ -33,6 +33,12 @@
           "locationAlwaysPermission": "O Travelling precisa da sua localização para criar o álbum.",
           "locationWhenInUsePermission": "O Travelling precisa da sua localização para criar o álbum."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
       ]
     ]
   }

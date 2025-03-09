@@ -90,7 +90,7 @@ const Album = ({ route }) => {
 				contentContainerStyle={styles.scrollViewContent}
 				showsVerticalScrollIndicator={false}
 			>
-        {/* Área da capa */}
+        {/* Seção da capa */}
 				<View style={{ position: 'relative' }}>
 					{album.cover ? (
 						<Image 

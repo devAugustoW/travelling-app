@@ -122,6 +122,7 @@ const Home = () => {
 
       setUserAlbums(response.data.albums);
       setLoading(false);
+			
     } catch (error) {
       console.log('Erro ao buscar álbuns:', error);
       setLoading(false);

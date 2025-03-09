@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, FlatList, StyleSheet } from 'react-native';
-import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 

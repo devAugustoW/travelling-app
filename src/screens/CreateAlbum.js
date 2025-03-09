@@ -17,21 +17,23 @@ import {
 } from 'react-native';
 
 const CreateAlbum = () => {
-	const navigation = useNavigation();
-
   const [formData, setFormData] = useState({
-    title: '',
-		description: '', 
-		destination: '',
     typeTrip: '',
-    tripActivity: '',
+		destination: '',
+		title: '',
+		tripActivity: '',
     difficulty: '',
     timeTravel: '',
-    cost: '',
+		cost: '',
+		description: '', 
 		grade: '',
     hasArrived: false
   });
+	const [isLoading, setIsLoading] = useState(false);
+	const navigation = useNavigation();
 
+
+	// Lista
   const tripTypes = [
     { label: 'Floresta', value: 'forest' },
     { label: 'Montanha', value: 'mountain' },
@@ -41,6 +43,7 @@ const CreateAlbum = () => {
     { label: 'Trip', value: 'trip' },
   ];
 
+	// Lista
 	const tripActivities = [
     { label: 'Caminhada', value: 'Caminhada' },
     { label: 'Trilha', value: 'Trilha' },
@@ -49,13 +52,15 @@ const CreateAlbum = () => {
     { label: 'Desafio', value: 'Desafio' }
   ];
 
-  const difficulties = [
+	// Lista
+  const difficulty = [
     { label: 'Fácil', value: 'Fácil' },
     { label: 'Médio', value: 'Médio' },
     { label: 'Difícil', value: 'Difícil' }
   ];
 
-  const durations = [
+	// lista
+  const timeTravel = [
     { label: '30 - 60min', value: '30 - 60min' },
     { label: '60 - 90min', value: '60 - 90min' },
     { label: '90min - 2h', value: '90min - 2h' },
@@ -63,17 +68,14 @@ const CreateAlbum = () => {
     { label: '+3h', value: '+3h' }
   ];
 
-  const budgets = [
+	// lista
+  const cost = [
 		{ label: '1k', value: '1k' },
     { label: '1k - 3k', value: '1k - 3k' },
     { label: '3k - 5k', value: '3k - 5k' },
     { label: '5K -10k', value: '5K -10k' },
 		{ label: '+10k', value: '+10k' }
   ];
-
-  const handleSelectType = (type) => {
-    setFormData(prev => ({ ...prev, type }));
-  };
 
 	// pega a localização do usuário
 	const getLocation = async () => {
@@ -96,6 +98,7 @@ const CreateAlbum = () => {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude
       };
+
     } catch (error) {
       console.log('Erro ao obter localização:', error);
       Alert.alert(
@@ -103,12 +106,14 @@ const CreateAlbum = () => {
         'Não foi possível obter sua localização.',
         [{ text: 'OK' }]
       );
+
       return null;
     }
   };
 
 	// criar álbum
 	const handleCreateAlbum = async () => {
+		setIsLoading(true);
     try {
       // Pega o token do AsyncStorage
       const token = await AsyncStorage.getItem('@auth_token');
@@ -118,7 +123,7 @@ const CreateAlbum = () => {
       }
 
       // Valida campos obrigatórios
-      if (!formData.albumName || !formData.city || !formData.description) {
+      if (!formData.typeTrip || !formData.destination || !formData.description || !formData.title) {
         Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
         return;
       }
@@ -129,7 +134,7 @@ const CreateAlbum = () => {
         longitude: 0
       };
 
-			// Se já chegou no destino, tenta obter a localização
+			// Se já chegou no destino, captura a localização
       if (formData.hasArrived) {
         const currentLocation = await getLocation();
         if (!currentLocation) {
@@ -140,16 +145,16 @@ const CreateAlbum = () => {
 
       // Prepara os dados para envio
       const albumData = {
-        title: formData.albumName,
-        description: formData.description,
-        destination: formData.city,
-				typeTrip: formData.type || undefined,
-        tripActivity: formData.tripType || undefined,
-        difficulty: formData.difficulty || undefined, 
-        timeTravel: formData.duration || undefined, 
-        cost: formData.budget || undefined, 
-        grade: 0,
-        location: locationData
+				typeTrip: formData.typeTrip || undefined,
+				destination: formData.destination || undefined,
+				title: formData.title || undefined,
+				tripActivity: formData.tripActivity || undefined,
+				difficulty: formData.difficulty || undefined, 
+				timeTravel: formData.timeTravel || undefined, 
+				cost: formData.cost || undefined, 
+				description: formData.description || undefined,
+				grade: 0,
+				location: locationData
       };
 
 			// Remove campos undefined antes de enviar
@@ -158,8 +163,6 @@ const CreateAlbum = () => {
 					delete albumData[key];
 				}
 			});
-
-			console.log('Dados enviados:', albumData);
 
       // Faz a requisição para criar o álbum
       const response = await axios.post(
@@ -172,8 +175,6 @@ const CreateAlbum = () => {
         }
       );
 
-			console.log('Resposta da API:', response.data);
-
       Alert.alert(
         'Sucesso',
         'Álbum criado com sucesso!',
@@ -183,15 +184,15 @@ const CreateAlbum = () => {
             onPress: () => {
               // Limpa o formulário
               setFormData({
-                type: '',
-                city: '',
-                albumName: '',
-                tripType: '',
-                difficulty: '',
-                duration: '',
-                budget: '',
-                description: '',
-                hasArrived: false
+								typeTrip: '',
+								destination: '',
+								title: '',
+								tripActivity: '',
+								difficulty: '',
+								timeTravel: '',
+								cost: '',
+								description: '',
+								hasArrived: false
               });
               // Navega para a tela Album
               navigation.navigate('Album', { albumId: response.data.album._id });
@@ -209,13 +210,15 @@ const CreateAlbum = () => {
       }
       
       Alert.alert('Erro', errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
-
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
+				{/* Header com título e imagem */}
         <View style={styles.header}>
           <Text style={styles.title}>Vamos criar um novo Álbum?</Text>
           <Image 
@@ -224,21 +227,22 @@ const CreateAlbum = () => {
           />
         </View>
 
+				{/* Seleção do Tipo de viagem */}
         <Text style={styles.sectionTitle}>Que tipo de viagem você esta fazendo?</Text>
-        
         <View style={styles.typeContainer}>
           {tripTypes.map((type) => (
             <TouchableOpacity
               key={type.value}
               style={[
                 styles.typeButton,
-                formData.type === type.value && styles.typeButtonSelected
+                formData.typeTrip === type.value && styles.typeButtonSelected
               ]}
-              onPress={() => handleSelectType(type.value)}
+              onPress={() =>setFormData(prev => ({...prev, typeTrip: type.value}))}
             >
+
               <Text style={[
                 styles.typeButtonText,
-                formData.type === type.value && styles.typeButtonTextSelected
+                formData.typeTrip === type.value && styles.typeButtonTextSelected
               ]}>
                 {type.label}
               </Text>
@@ -246,24 +250,27 @@ const CreateAlbum = () => {
           ))}
         </View>
 
+				{/* seção de destino */}
         <Text style={styles.sectionTitle}>Para onde vamos?</Text>
         <TextInput
           style={styles.input}
           placeholder="Ex.: Rio de Janeiro - RJ"
-          placeholderTextColor="#cccccc"
-          value={formData.city}
-          onChangeText={(text) => setFormData(prev => ({ ...prev, city: text }))}
+          placeholderTextColor="#667"
+          value={formData.destination}
+          onChangeText={(text) => setFormData(prev => ({ ...prev, destination: text }))}
         />
 
+				{/* Título do álbum */}
         <Text style={styles.sectionTitle}>Como vamos chamar este álbum?</Text>
         <TextInput
           style={styles.input}
           placeholder="Ex.: Cristo Redentor"
-          placeholderTextColor="#cccccc"
-          value={formData.albumName}
-          onChangeText={(text) => setFormData(prev => ({ ...prev, albumName: text }))}
+          placeholderTextColor="#667"
+          value={formData.title}
+          onChangeText={(text) => setFormData(prev => ({ ...prev, title: text }))}
         />
 
+				{/* Seção de atividades */}
 				<View style={styles.row}>
           <View style={styles.column}>
             <Text style={styles.sectionTitle}>Nesta viagem haverá:</Text>
@@ -273,90 +280,95 @@ const CreateAlbum = () => {
                 style={styles.checkboxContainer}
                 onPress={() => setFormData(prev => ({ 
                   ...prev, 
-                  tripType: activity.value 
+                  tripActivity: activity.value 
                 }))}
               >
                 <View style={[
                   styles.checkbox,
-                  formData.tripType === activity.value && styles.checkboxSelected
+                  formData.tripActivity === activity.value && styles.checkboxSelected
                 ]} />
                 <Text style={styles.checkboxLabel}>{activity.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
+					{/* Seção de dificuldade */}
           <View style={styles.column}>
             <Text style={styles.sectionTitle}>Dificuldade:</Text>
-            {difficulties.map((difficulty) => (
+            {difficulty.map((difficultyItem) => (
               <TouchableOpacity
-                key={difficulty.value}
+                key={difficultyItem.value}
                 style={styles.checkboxContainer}
                 onPress={() => setFormData(prev => ({ 
                   ...prev, 
-                  difficulty: difficulty.value 
+                  difficulty: difficultyItem.value 
                 }))}
               >
                 <View style={[
                   styles.checkbox,
-                  formData.difficulty === difficulty.value && styles.checkboxSelected
+                  formData.difficulty === difficultyItem.value && styles.checkboxSelected
                 ]} />
-                <Text style={styles.checkboxLabel}>{difficulty.label}</Text>
+                <Text style={styles.checkboxLabel}>{difficultyItem.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
+				{/* Seção de tempo de viagem */}
         <Text style={styles.sectionTitle}>Tempo aproximado</Text>
-        {durations.map((duration) => (
+        {timeTravel.map((duration) => (
           <TouchableOpacity
             key={duration.value}
             style={styles.checkboxContainer}
             onPress={() => setFormData(prev => ({ 
               ...prev, 
-              duration: duration.value 
+              timeTravel: duration.value 
             }))}
           >
             <View style={[
               styles.checkbox,
-              formData.duration === duration.value && styles.checkboxSelected
+              formData.timeTravel === duration.value && styles.checkboxSelected
             ]} />
             <Text style={styles.checkboxLabel}>{duration.label}</Text>
           </TouchableOpacity>
         ))}
 
+				{/* Seção de custo */}
         <Text style={styles.sectionTitle}>Ticket médio</Text>
-        {budgets.map((budget) => (
+        {cost.map((costItem) => (
           <TouchableOpacity
-            key={budget.value}
+            key={costItem.value}
             style={styles.checkboxContainer}
             onPress={() => setFormData(prev => ({ 
               ...prev, 
-              budget: budget.value 
+              cost: costItem.value 
             }))}
           >
             <View style={[
               styles.checkbox,
-              formData.budget === budget.value && styles.checkboxSelected
+              formData.cost === costItem.value && styles.checkboxSelected
             ]} />
-            <Text style={styles.checkboxLabel}>{budget.label}</Text>
+            <Text style={styles.checkboxLabel}>{costItem.label}</Text>
           </TouchableOpacity>
         ))}
 
+				{/* Seção de descrição */}
         <Text style={styles.sectionTitle}>Você quer descrever algo sobre a viagem agora?</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           placeholder="Descreva sua viagem..."
-          placeholderTextColor="#666"
+          placeholderTextColor="#667"
           multiline
           numberOfLines={4}
           value={formData.description}
           onChangeText={(text) => setFormData(prev => ({ ...prev, description: text }))}
         />
 
+				{/* Seção de chegada no destino */}
         <Text style={styles.sectionTitle}>
           Você já chegou no <Text style={styles.highlightText}>seu Destino</Text>?
         </Text>
-        <View style={styles.row}>
+        <View style={styles.arrivedContainer}>
           <TouchableOpacity
             style={[
               styles.arrivalButton,
@@ -366,6 +378,7 @@ const CreateAlbum = () => {
           >
             <Text style={styles.arrivalButtonText}>Sim</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={[
               styles.arrivalButton,
@@ -377,12 +390,16 @@ const CreateAlbum = () => {
           </TouchableOpacity>
         </View>
 
-				<View style={styles.buttonContainer}>
+				{/* Botão de criar álbum */}		
+				<View style={styles.createButtonContainer}>
 					<TouchableOpacity 
 						style={styles.createButton}
 						onPress={handleCreateAlbum}
+						disabled={isLoading}
 					>
-						<Text style={styles.createButtonText}>Criar Álbum</Text>
+						<Text style={styles.createButtonText}>
+							{isLoading ? 'Criando...' : 'Criar Álbum'}
+						</Text>
 					</TouchableOpacity>
       	</View>
       </ScrollView>
@@ -393,18 +410,18 @@ const CreateAlbum = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#031F2B',
     padding: 20,
+    backgroundColor: '#031F2B',
   },
   header: {
     alignItems: 'center',
     marginBottom: 30,
   },
-	title: {
+  title: {
     color: '#FFF',
     fontSize: 20,
     fontFamily: 'Poppins-SemiBold',
-    marginBottom: 20,
+		marginBottom: 20,
   },
   headerImage: {
     width: '100%',
@@ -415,7 +432,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
-    marginBottom: 15,
+		marginBottom: 15,
   },
   typeContainer: {
     flexDirection: 'row',
@@ -424,46 +441,46 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   typeButton: {
-    backgroundColor: '#263238',
+    minWidth: '30%',
+    marginBottom: 10,
     paddingHorizontal: 15,
     paddingVertical: 8,
-    borderRadius: 20,
-    marginBottom: 10,
     borderWidth: 1,
+    borderRadius: 20,
     borderColor: '#5EDFFF',
-    minWidth: '30%',
+    backgroundColor: '#263238',
   },
   typeButtonSelected: {
     backgroundColor: '#5EDFFF',
   },
   typeButtonText: {
+    textAlign: 'center',
     color: '#FFF',
     fontSize: 14,
     fontFamily: 'Poppins-Regular',
-    textAlign: 'center',
   },
   typeButtonTextSelected: {
     color: '#031F2B',
   },
-	input: {
-    backgroundColor: '#263238',
+  input: {
+    minHeight: 50,
+    marginTop: -10,
+    marginBottom: 20,
+    padding: 12,
+    borderWidth: 1,
     borderRadius: 8,
-		padding: 12,
+    borderColor: '#5EDFFF',
+    backgroundColor: '#263238',
     color: '#FFF',
     fontFamily: 'Poppins-Regular',
-    borderWidth: 1,
-    borderColor: '#5EDFFF',
-		minHeight: 50,
-		textAlignVertical: 'center',
-		outlineStyle: 'none',
-		marginTop: -10,
-		marginBottom: 20,
+    textAlignVertical: 'center',
+    outlineStyle: 'none',
   },
-	row: {
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
 		gap: 30,
-		marginTop: 10,
+    marginTop: 10,
     marginBottom: 20,
   },
   column: {
@@ -477,10 +494,10 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 20,
     height: 20,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#5EDFFF',
     marginRight: 10,
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: '#5EDFFF',
   },
   checkboxSelected: {
     backgroundColor: '#5EDFFF',
@@ -493,18 +510,23 @@ const styles = StyleSheet.create({
   textArea: {
     height: 100,
     textAlignVertical: 'top',
+    lineHeight: 23,
   },
   highlightText: {
     color: '#5EDFFF',
   },
+  arrivedContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   arrivalButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#5EDFFF',
-    marginHorizontal: 5,
+    width: '47%',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#5EDFFF',
   },
   arrivalButtonSelected: {
     backgroundColor: '#5EDFFF',
@@ -514,8 +536,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins-Regular',
   },
-  buttonContainer: {
-    marginTop: 30,
+  createButtonContainer: {
+    marginTop: 20,
     marginBottom: 0,
   },
   createButton: {
@@ -525,10 +547,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#5EDFFF',
   },
   createButtonText: {
+    textAlign: 'center',
     color: '#031F2B',
     fontSize: 16,
     fontFamily: 'Poppins-SemiBold',
-    textAlign: 'center',
   },
 });
 

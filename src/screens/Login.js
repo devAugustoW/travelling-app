@@ -21,7 +21,6 @@ const Login = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-
     try {
       if (!email.trim() || !password.trim()) {
         Alert.alert('Erro', 'Por favor, preencha todos os campos');
@@ -30,6 +29,7 @@ const Login = ({ navigation }) => {
 
       setLoading(true);
 
+			// faz a chamada de login no backend
       const response = await axios.post(`${API_URL}/login`, {
         email,
         password

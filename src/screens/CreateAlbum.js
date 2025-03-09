@@ -123,7 +123,7 @@ const CreateAlbum = () => {
       }
 
       // Valida campos obrigatórios
-      if (!formData.typeTrip || !formData.destination || !formData.description || !formData.title) {
+      if (!formData.typeTrip || !formData.destination || !formData.title) {
         Alert.alert('Erro', 'Preencha todos os campos obrigatórios');
         return;
       }
@@ -210,8 +210,10 @@ const CreateAlbum = () => {
       }
       
       Alert.alert('Erro', errorMessage);
+			
     } finally {
       setIsLoading(false);
+
     }
   };
 

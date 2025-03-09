@@ -68,14 +68,17 @@ const Album = ({ route }) => {
 	// função para capturar a localização
 	const handleCheckIn = async () => {
     try {
+			// executa solicitação de permissão
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permissão negada', 'Permissão para acessar localização foi negada.');
         return;
       }
 
+			// pega a localização atual
       const location = await Location.getCurrentPositionAsync({});
-      console.log('Localização capturada:', location);
+
+			// atualiza o estado de localização capturada
       setLocationCaptured(true); 
 
     } catch (error) {

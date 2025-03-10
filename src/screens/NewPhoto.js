@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import 'react-native-get-random-values';
+
 
 const NewPhoto = ({ route, navigation }) => {
 	const { albumId } = route.params || {};
@@ -108,7 +112,9 @@ const NewPhoto = ({ route, navigation }) => {
 
 			<ScrollView 
 				showsVerticalScrollIndicator={false}
-				contentContainerStyle={styles.scrollViewContent}>
+				contentContainerStyle={styles.scrollViewContent}
+				nestedScrollEnabled={true}
+				keyboardShouldPersistTaps="always">
 
 				{/* Área de preview da foto */}
 				<View style={styles.imagePreview}>
@@ -157,13 +163,29 @@ const NewPhoto = ({ route, navigation }) => {
 					<Text style={styles.formLabel}>Adicionar localização</Text>
 					<View style={styles.searchContainer}>
 						<Feather name="search" size={18} color="#5EDFFF" style={styles.searchIcon} />
-						<TextInput
-							style={styles.searchInput}
-							placeholder="Adicione o nome da localização..."
-							placeholderTextColor="#667"
-							value={photoData.nameLocation}
-							onChangeText={(value) => updatePhotoData('nameLocation', value)}
-						/>
+						<GooglePlacesAutocomplete
+            	placeholder="Adicione uma localização..."
+							textInputProps={{
+								placeholderTextColor: '#667'
+							}}
+							keyboardShouldPersistTaps="always"
+            	onPress={(data, details = null) => {
+              	updatePhotoData('nameLocation', data.description);
+              	updatePhotoData('location', {
+                	latitude: details.geometry.location.lat,
+                	longitude: details.geometry.location.lng,
+              	});
+            	}}
+            	query={{
+              	key: GOOGLE_MAPS_API_KEY,
+              	language: 'pt-BR',
+            	}}
+            	styles={{
+              	textInput: styles.searchInput,
+              	listView: styles.listView,
+            	}}
+            	fetchDetails={true}
+          	/>
 					</View>
 
 					{/* Opção de capa do álbum */}
@@ -302,16 +324,18 @@ const styles = StyleSheet.create({
     borderBottomColor: '#5EDFFF',
     marginBottom: 10,
   },
-  searchIcon: {
+	searchIcon: {
     marginRight: 0,
   },
-  searchInput: {
+	searchInput: {
     flex: 1,
     color: '#5EDFFF',
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
     paddingVertical: 8,
+		backgroundColor: '#031F2B',
   },
+	listView:{}, 
 	albumCoverContainer: {
 		marginTop: 15,
 	},

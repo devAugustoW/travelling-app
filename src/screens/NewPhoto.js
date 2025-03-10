@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GOOGLE_MAPS_API_KEY } from '@env';
-import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView, FlatList, View, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
@@ -110,122 +110,128 @@ const NewPhoto = ({ route, navigation }) => {
 				<Text style={styles.title}>Nova Foto</Text>
 			</View>
 
-			<ScrollView 
-				showsVerticalScrollIndicator={false}
-				contentContainerStyle={styles.scrollViewContent}
-				nestedScrollEnabled={true}
-				keyboardShouldPersistTaps="always">
+			<FlatList
+      	data={[]} 
+				keyExtractor={(item, index) => index.toString()}
+				contentContainerStyle={{ paddingHorizontal: 10 }}
+        ListHeaderComponent={() => (
+        <>
+          {/* Área de preview da foto */}
+          <View style={styles.imagePreview}>
+            {photoData.image ? (
+              <Image source={{ uri: photoData.image }} style={styles.image} />
+            ) : (
+              <Text style={styles.placeholder}>Nenhuma foto selecionada</Text>
+            )}
+          </View>
 
-				{/* Área de preview da foto */}
-				<View style={styles.imagePreview}>
-					{photoData.image ? (
-						<Image source={{ uri: photoData.image }} style={styles.image} />
-					) : (
-						<Text style={styles.placeholder}>Nenhuma foto selecionada</Text>
-					)}
-				</View>
+          {/* Botões de seleção de foto */}
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
+              <Text style={styles.buttonText}>Galeria de imagens</Text>
+            </TouchableOpacity>
 
-				{/* Botões de seleção de foto */}
-				<View style={styles.buttonsContainer}>
-					<TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
-						<Text style={styles.buttonText}>Galeria de imagens</Text>
-					</TouchableOpacity>
+            <TouchableOpacity onPress={openCamera} style={styles.cameraButton}>
+              <Feather name="camera" size={20} color="#FFF" />
+            </TouchableOpacity>
+          </View>
 
-					<TouchableOpacity onPress={openCamera} style={styles.cameraButton}>
-						<Feather name="camera" size={20} color="#FFF" />
-					</TouchableOpacity>
-				</View>
+          {/* Formulário de detalhes da foto */}
+          <View style={styles.formContainer}>
+            {/* Título da foto */}
+            <Text style={styles.formLabel}>Título para foto</Text>
+            <TextInput
+              style={styles.titleInput}
+              placeholder="Adicione um título..."
+              placeholderTextColor="#667"
+              value={photoData.title}
+              onChangeText={(text) => updatePhotoData('title', text)}
+            />
 
-				{/* Formulário de detalhes da foto */}
-				<View style={styles.formContainer}>
-					{/* Título da foto */}
-					<Text style={styles.formLabel}>Título para foto</Text>
-					<TextInput
-						style={styles.titleInput}
-						placeholder="Adicione um título..."
-						placeholderTextColor="#667"
-						value={photoData.title}
-						onChangeText={(text) => updatePhotoData('title', text)}
-					/>
+            {/* Legenda da foto */}
+            <Text style={styles.formLabel}>Adicione um legenda...</Text>
+            <TextInput
+              style={styles.descriptionInput}
+              placeholder="Adicione uma legenda..."
+              placeholderTextColor="#667"
+              multiline
+              value={photoData.description}
+              onChangeText={(value) => updatePhotoData('description', value)}
+            />
 
-					{/* Legenda da foto */}
-					<Text style={styles.formLabel}>Adicione um legenda...</Text>
-					<TextInput
-						style={styles.descriptionInput}
-						placeholder="Adicione uma legenda..."
-						placeholderTextColor="#667"
-						multiline
-						value={photoData.description}
-						onChangeText={(value) => updatePhotoData('description', value)}
-					/>
+            {/* Localização */}
+            <Text style={styles.formLabel}>Adicionar localização</Text>
+            <View style={styles.searchContainer}>
+              <Feather name="search" size={18} color="#5EDFFF" style={styles.searchIcon} />
+              <GooglePlacesAutocomplete
+                placeholder="Adicione uma localização..."
+                textInputProps={{
+                  placeholderTextColor: '#667'
+                }}
+                keyboardShouldPersistTaps="always"
+                onPress={(data, details = null) => {
+                  updatePhotoData('nameLocation', data.description);
+                  updatePhotoData('location', {
+                    latitude: details.geometry.location.lat,
+                    longitude: details.geometry.location.lng,
+                  });
+                }}
+                query={{
+                  key: GOOGLE_MAPS_API_KEY,
+                  language: 'pt-BR',
+                }}
+                styles={{
+                  textInput: styles.searchInput,
+                  listView: styles.listView,
+                }}
+                fetchDetails={true}
+              />
+            </View>
+          </View>
+        </>
+      )}
+      ListFooterComponent={() => (
+        <>
+          {/* Opção de capa do álbum */}
+          <View style={styles.albumCoverContainer}>
+            <Text style={styles.formLabel}>Capa do Álbum</Text>
+            <View style={styles.checkboxContainer}>
+              <TouchableOpacity
+                style={styles.checkboxWrapper}
+                onPress={() => updatePhotoData('isCoverPhoto', true)}
+              >
+                <View style={[styles.checkbox, photoData.isCoverPhoto && styles.checkboxSelected]}>
+                  {photoData.isCoverPhoto && <Feather name="check" size={14} color="#031F2B" />}
+                </View>
+                <Text style={styles.checkboxLabel}>Sim</Text>
+              </TouchableOpacity>
 
-					{/* Localização */}
-					<Text style={styles.formLabel}>Adicionar localização</Text>
-					<View style={styles.searchContainer}>
-						<Feather name="search" size={18} color="#5EDFFF" style={styles.searchIcon} />
-						<GooglePlacesAutocomplete
-            	placeholder="Adicione uma localização..."
-							textInputProps={{
-								placeholderTextColor: '#667'
-							}}
-							keyboardShouldPersistTaps="always"
-            	onPress={(data, details = null) => {
-              	updatePhotoData('nameLocation', data.description);
-              	updatePhotoData('location', {
-                	latitude: details.geometry.location.lat,
-                	longitude: details.geometry.location.lng,
-              	});
-            	}}
-            	query={{
-              	key: GOOGLE_MAPS_API_KEY,
-              	language: 'pt-BR',
-            	}}
-            	styles={{
-              	textInput: styles.searchInput,
-              	listView: styles.listView,
-            	}}
-            	fetchDetails={true}
-          	/>
-					</View>
+              <TouchableOpacity
+                style={styles.checkboxWrapper}
+                onPress={() => updatePhotoData('isCoverPhoto', false)}
+              >
+                <View style={[styles.checkbox, !photoData.isCoverPhoto && styles.checkboxSelected]}>
+                  {!photoData.isCoverPhoto && <Feather name="check" size={14} color="#031F2B" />}
+                </View>
+                <Text style={styles.checkboxLabel}>Não</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-					{/* Opção de capa do álbum */}
-					<View style={styles.albumCoverContainer}>
-						<Text style={styles.formLabel}>Capa do Álbum</Text>
-						<View style={styles.checkboxContainer}>
-							<TouchableOpacity
-								style={styles.checkboxWrapper}
-								onPress={() => updatePhotoData('isCoverPhoto', true)}
-							>
-								<View style={[styles.checkbox, photoData.isCoverPhoto && styles.checkboxSelected]}>
-									{photoData.isCoverPhoto && <Feather name="check" size={14} color="#031F2B" />}
-								</View>
-								<Text style={styles.checkboxLabel}>Sim</Text>
-							</TouchableOpacity>
+          {/* Botões de ação */}
+          <View style={styles.actionButtons}>
+            <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
 
-							<TouchableOpacity
-								style={styles.checkboxWrapper}
-								onPress={() => updatePhotoData('isCoverPhoto', false)}
-							>
-								<View style={[styles.checkbox, !photoData.isCoverPhoto && styles.checkboxSelected]}>
-									{!photoData.isCoverPhoto && <Feather name="check" size={14} color="#031F2B" />}
-								</View>
-								<Text style={styles.checkboxLabel}>Não</Text>
-							</TouchableOpacity>
-						</View>
-					</View>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSavePhoto}>
+              <Text style={styles.saveButtonText}>Salvar</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+    />
 
-					{/* Botões de ação */}
-					<View style={styles.actionButtons}>
-						<TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-							<Text style={styles.cancelButtonText}>Cancelar</Text>
-						</TouchableOpacity>
-
-						<TouchableOpacity style={styles.saveButton} onPress={handleSavePhoto}>
-							<Text style={styles.saveButtonText}>Salvar</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
-			</ScrollView>
 		</SafeAreaView>
 	);
 }
@@ -239,16 +245,13 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		padding: 20,
+		padding: 10,
 	},
 	title: {
 		color: '#FFF',
 		fontSize: 18,
 		fontFamily: 'Poppins-Bold',
 		marginLeft: -120,
-	},
-	scrollViewContent: {
-		paddingHorizontal: 20,
 	},
 	imagePreview: {
 		width: '100%',
@@ -329,13 +332,16 @@ const styles = StyleSheet.create({
   },
 	searchInput: {
     flex: 1,
+		paddingVertical: 0,
     color: '#5EDFFF',
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
-    paddingVertical: 8,
+    
 		backgroundColor: '#031F2B',
   },
-	listView:{}, 
+	listView:{
+		marginLeft: -20,
+	}, 
 	albumCoverContainer: {
 		marginTop: 15,
 	},

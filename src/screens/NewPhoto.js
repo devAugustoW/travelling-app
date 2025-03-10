@@ -5,9 +5,8 @@ import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 
 const NewPhoto = ({ route, navigation }) => {
-	// Extrair albumId dos parâmetros da rota
 	const { albumId } = route.params || {};
-	
+	const [isLoading, setIsLoading] = useState(false);
 	const [photoData, setPhotoData] = useState({
 		image: null,
 		title: '',
@@ -23,10 +22,7 @@ const NewPhoto = ({ route, navigation }) => {
 
 	// Função para atualizar campos específicos
 	const updatePhotoData = (field, value) => {
-		setPhotoData(prev => ({
-			...prev,
-			[field]: value
-		}));
+		setPhotoData(prev => ({...prev, [field]: value}));
 	};
 
 	// Função para carregar as fotos da galeria
@@ -44,15 +40,20 @@ const NewPhoto = ({ route, navigation }) => {
 
 	// Função para abrir a câmera
 	const openCamera = () => {
-		ImagePicker.launchCameraAsync({ mediaType: 'photo' }).then((response) => {
+		ImagePicker.launchCameraAsync({ mediaType: 'photo' })
+		.then((response) => {
 			if (!response.canceled) {
 				updatePhotoData('image', response.assets[0].uri);
 			}
 		});
 	};
 
+	// função para buscar a localização
+
+
 	// Função para salvar a foto
 	const handleSavePhoto = async () => {
+		setIsLoading(true);
 		try {
 			// Validação básica
 			if (!photoData.image) {
@@ -64,19 +65,33 @@ const NewPhoto = ({ route, navigation }) => {
 				Alert.alert('Erro', 'Adicione um título para a foto');
 				return;
 			}
+
+			// Chama a função para buscar a localização
+
+
+			// prepara photoData para envio
+
+
+			// Remove campos undefined antes de enviar
+
 			
-			// Aqui você faria a chamada para o backend
-			// Exemplo:
-			// const response = await api.post('/photos', photoData);
+			// Chamada para o backend
+
+
+			// menssagem de sucesso, limpar campos e navega para a tela 
 			
 			console.log('Dados da foto a serem enviados:', photoData);
 			
-			// Navegue de volta ou para a próxima tela
-			navigation.goBack();
+			// Navegua para próxima tela
+
 			
 		} catch (error) {
 			console.error('Erro ao salvar foto:', error);
 			Alert.alert('Erro', 'Não foi possível salvar a foto');
+
+		} finally {
+			setIsLoading(false);
+
 		}
 	};
 
@@ -114,7 +129,6 @@ const NewPhoto = ({ route, navigation }) => {
 						<Feather name="camera" size={20} color="#FFF" />
 					</TouchableOpacity>
 				</View>
-
 
 				{/* Formulário de detalhes da foto */}
 				<View style={styles.formContainer}>
@@ -297,9 +311,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
     paddingVertical: 8,
-  },
-  locationsList: {
-    marginBottom: 20,
   },
 	albumCoverContainer: {
 		marginTop: 15,

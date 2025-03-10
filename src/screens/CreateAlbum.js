@@ -175,6 +175,7 @@ const CreateAlbum = () => {
         }
       );
 
+			// menssagem de sucesso, limpar campos e navega para a tela
       Alert.alert(
         'Sucesso',
         'Álbum criado com sucesso!',

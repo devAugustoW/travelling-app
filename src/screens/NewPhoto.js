@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { GOOGLE_MAPS_API_KEY } from '@env';
-import { SafeAreaView, FlatList, View, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, SafeAreaView, KeyboardAvoidingView, ScrollView, FlatList, Platform, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
-import * as Location from 'expo-location';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import 'react-native-get-random-values';
-
 
 const NewPhoto = ({ route, navigation }) => {
 	const { albumId } = route.params || {};
@@ -16,18 +14,18 @@ const NewPhoto = ({ route, navigation }) => {
 		title: '',
 		description: '',
 		nameLocation: '',
-		location: {       
+		location: {
 			latitude: null,
 			longitude: null
 		},
 		isCoverPhoto: false,
-		albumId: albumId, 
+		albumId: albumId,
 	});
 
 	// Função para atualizar campos específicos
-	const updatePhotoData = (field, value) => {
-		setPhotoData(prev => ({...prev, [field]: value}));
-	};
+	const updatePhotoData = useCallback((field, value) => {
+		setPhotoData((prev) => ({ ...prev, [field]: value }));
+	}, []);
 
 	// Função para carregar as fotos da galeria
 	const pickImage = async () => {
@@ -45,15 +43,12 @@ const NewPhoto = ({ route, navigation }) => {
 	// Função para abrir a câmera
 	const openCamera = () => {
 		ImagePicker.launchCameraAsync({ mediaType: 'photo' })
-		.then((response) => {
-			if (!response.canceled) {
-				updatePhotoData('image', response.assets[0].uri);
-			}
-		});
+			.then((response) => {
+				if (!response.canceled) {
+					updatePhotoData('image', response.assets[0].uri);
+				}
+			});
 	};
-
-	// função para buscar a localização
-
 
 	// Função para salvar a foto
 	const handleSavePhoto = async () => {
@@ -64,40 +59,23 @@ const NewPhoto = ({ route, navigation }) => {
 				Alert.alert('Erro', 'Selecione uma imagem');
 				return;
 			}
-			
+
 			if (!photoData.title) {
 				Alert.alert('Erro', 'Adicione um título para a foto');
 				return;
 			}
 
-			// Chama a função para buscar a localização
-
-
-			// prepara photoData para envio
-
-
-			// Remove campos undefined antes de enviar
-
-			
-			// Chamada para o backend
-
-
-			// menssagem de sucesso, limpar campos e navega para a tela 
-			
 			console.log('Dados da foto a serem enviados:', photoData);
-			
-			// Navegua para próxima tela
 
-			
 		} catch (error) {
 			console.error('Erro ao salvar foto:', error);
 			Alert.alert('Erro', 'Não foi possível salvar a foto');
-
 		} finally {
 			setIsLoading(false);
-
 		}
 	};
+
+
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -106,132 +84,110 @@ const NewPhoto = ({ route, navigation }) => {
 				<TouchableOpacity onPress={() => navigation.goBack()}>
 					<Feather name="x" size={24} color="#FFF" />
 				</TouchableOpacity>
-
 				<Text style={styles.title}>Nova Foto</Text>
 			</View>
 
-			<FlatList
-      	data={[]} 
-				keyExtractor={(item, index) => index.toString()}
-				contentContainerStyle={{ paddingHorizontal: 10 }}
-        ListHeaderComponent={() => (
-        <>
-          {/* Área de preview da foto */}
-          <View style={styles.imagePreview}>
-            {photoData.image ? (
-              <Image source={{ uri: photoData.image }} style={styles.image} />
-            ) : (
-              <Text style={styles.placeholder}>Nenhuma foto selecionada</Text>
-            )}
-          </View>
+			<KeyboardAvoidingView
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				style={{ flex: 1 }}
+			>
+				<ScrollView style={styles.scrollContainer}>
+					{/* Área de preview da foto */}
+					<View style={styles.imagePreview}>
+						{photoData.image ? (
+							<Image source={{ uri: photoData.image }} style={styles.image} />
+						) : (
+							<Text style={styles.placeholder}>Nenhuma foto selecionada</Text>
+						)}
+					</View>
 
-          {/* Botões de seleção de foto */}
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
-              <Text style={styles.buttonText}>Galeria de imagens</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity onPress={openCamera} style={styles.cameraButton}>
-              <Feather name="camera" size={20} color="#FFF" />
-            </TouchableOpacity>
-          </View>
 
-          {/* Formulário de detalhes da foto */}
-          <View style={styles.formContainer}>
-            {/* Título da foto */}
-            <Text style={styles.formLabel}>Título para foto</Text>
-            <TextInput
-              style={styles.titleInput}
-              placeholder="Adicione um título..."
-              placeholderTextColor="#667"
-              value={photoData.title}
-              onChangeText={(text) => updatePhotoData('title', text)}
-            />
+					{/* Botões de seleção de foto */}
+					<View style={styles.buttonsContainer}>
+						<TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
+							<Text style={styles.buttonText}>Galeria de imagens</Text>
+						</TouchableOpacity>
 
-            {/* Legenda da foto */}
-            <Text style={styles.formLabel}>Adicione um legenda...</Text>
-            <TextInput
-              style={styles.descriptionInput}
-              placeholder="Adicione uma legenda..."
-              placeholderTextColor="#667"
-              multiline
-              value={photoData.description}
-              onChangeText={(value) => updatePhotoData('description', value)}
-            />
+						<TouchableOpacity onPress={openCamera} style={styles.cameraButton}>
+							<Feather name="camera" size={20} color="#FFF" />
+						</TouchableOpacity>
+					</View>
 
-            {/* Localização */}
-            <Text style={styles.formLabel}>Adicionar localização</Text>
-            <View style={styles.searchContainer}>
-              <Feather name="search" size={18} color="#5EDFFF" style={styles.searchIcon} />
-              <GooglePlacesAutocomplete
-                placeholder="Adicione uma localização..."
-                textInputProps={{
-                  placeholderTextColor: '#667'
-                }}
-                keyboardShouldPersistTaps="always"
-                onPress={(data, details = null) => {
-                  updatePhotoData('nameLocation', data.description);
-                  updatePhotoData('location', {
-                    latitude: details.geometry.location.lat,
-                    longitude: details.geometry.location.lng,
-                  });
-                }}
-                query={{
-                  key: GOOGLE_MAPS_API_KEY,
-                  language: 'pt-BR',
-                }}
-                styles={{
-                  textInput: styles.searchInput,
-                  listView: styles.listView,
-                }}
-                fetchDetails={true}
-              />
-            </View>
-          </View>
-        </>
-      )}
-      ListFooterComponent={() => (
-        <>
-          {/* Opção de capa do álbum */}
-          <View style={styles.albumCoverContainer}>
-            <Text style={styles.formLabel}>Capa do Álbum</Text>
-            <View style={styles.checkboxContainer}>
-              <TouchableOpacity
-                style={styles.checkboxWrapper}
-                onPress={() => updatePhotoData('isCoverPhoto', true)}
-              >
-                <View style={[styles.checkbox, photoData.isCoverPhoto && styles.checkboxSelected]}>
-                  {photoData.isCoverPhoto && <Feather name="check" size={14} color="#031F2B" />}
-                </View>
-                <Text style={styles.checkboxLabel}>Sim</Text>
-              </TouchableOpacity>
+					{/* Botão para adicionar localização */}
+					<TouchableOpacity
+						style={styles.locationButton}
+						onPress={() => navigation.navigate('InputPhotoLocation', { updatePhotoData })}
+					>
+						<Text style={styles.buttonText}>Selecionar Localização</Text>
+						<Feather name="chevron-right" size={18} color="#FFF" />
+					</TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.checkboxWrapper}
-                onPress={() => updatePhotoData('isCoverPhoto', false)}
-              >
-                <View style={[styles.checkbox, !photoData.isCoverPhoto && styles.checkboxSelected]}>
-                  {!photoData.isCoverPhoto && <Feather name="check" size={14} color="#031F2B" />}
-                </View>
-                <Text style={styles.checkboxLabel}>Não</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+					{/* Dados da foto */}
+					<View style={styles.formContainer}>
+						{/* Título da foto */}
+						<Text style={styles.formLabel}>Título para foto</Text>
+						<TextInput
+							style={styles.titleInput}
+							placeholder="Adicione um título..."
+							placeholderTextColor="#667"
+							value={photoData.title}
+							onChangeText={(text) => updatePhotoData('title', text)}
+						/>
 
-          {/* Botões de ação */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
-            </TouchableOpacity>
+						{/* Legenda da foto */}
+						<Text style={styles.formLabel}>Adicione uma legenda...</Text>
+						<TextInput
+							style={styles.descriptionInput}
+							placeholder="Adicione uma legenda..."
+							placeholderTextColor="#667"
+							multiline
+							value={photoData.description}
+							onChangeText={(text) => updatePhotoData('description', text)}
+						/>
 
-            <TouchableOpacity style={styles.saveButton} onPress={handleSavePhoto}>
-              <Text style={styles.saveButtonText}>Salvar</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-    />
 
+
+
+						{/* Seção definir capa do álbum */}
+						<View style={styles.albumCoverContainer}>
+							<Text style={styles.formLabel}>Capa do Álbum</Text>
+							<View style={styles.checkboxContainer}>
+								<TouchableOpacity
+									style={styles.checkboxWrapper}
+									onPress={() => updatePhotoData('isCoverPhoto', true)}
+								>
+									<View style={[styles.checkbox, photoData.isCoverPhoto && styles.checkboxSelected]}>
+										{photoData.isCoverPhoto && <Feather name="check" size={14} color="#031F2B" />}
+									</View>
+									<Text style={styles.checkboxLabel}>Sim</Text>
+								</TouchableOpacity>
+
+								<TouchableOpacity
+									style={styles.checkboxWrapper}
+									onPress={() => updatePhotoData('isCoverPhoto', false)}
+								>
+									<View style={[styles.checkbox, !photoData.isCoverPhoto && styles.checkboxSelected]}>
+										{!photoData.isCoverPhoto && <Feather name="check" size={14} color="#031F2B" />}
+									</View>
+									<Text style={styles.checkboxLabel}>Não</Text>
+								</TouchableOpacity>
+							</View>
+						</View>
+
+						<View style={styles.actionButtons}>
+							<TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+								<Text style={styles.cancelButtonText}>Cancelar</Text>
+							</TouchableOpacity>
+
+							<TouchableOpacity style={styles.saveButton} onPress={handleSavePhoto}>
+								<Text style={styles.saveButtonText}>Salvar</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+
+				</ScrollView>
+			</KeyboardAvoidingView>
 		</SafeAreaView>
 	);
 }
@@ -239,13 +195,16 @@ const NewPhoto = ({ route, navigation }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		padding: 10,
 		backgroundColor: '#031F2B',
 	},
+	scrollContainer:{},
 	header: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		padding: 10,
+		paddingBottom: 10,
+		paddingHorizontal: 10,
 	},
 	title: {
 		color: '#FFF',
@@ -273,12 +232,15 @@ const styles = StyleSheet.create({
 	buttonsContainer: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
-		paddingVertical: 30,
+		paddingTop: 30,
+		paddingBottom: 20,
 	},
 	galleryButton: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		backgroundColor: '#263238',
+		borderWidth: 1,
+		borderColor: '#5EDFFF',
 		paddingVertical: 10,
 		paddingHorizontal: 15,
 		borderRadius: 8,
@@ -292,119 +254,105 @@ const styles = StyleSheet.create({
 		color: '#FFF',
 		marginRight: 5,
 	},
-	formContainer: {
-    marginBottom: 20,
-  },
-  formLabel: {
-    color: '#FFF',
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-		marginBottom: -5,
-  },
-  titleInput: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#5EDFFF',
-    color: '#5EDFFF',
-    fontSize: 18,
-    fontFamily: 'Poppins-Regular',
-    paddingBottom: 0,
-    marginBottom: 35,
-  },
-  descriptionInput: {
-		borderBottomWidth: 1,
-    borderBottomColor: '#5EDFFF',
-    color: '#5EDFFF',
-    fontSize: 14,
-    fontFamily: 'Poppins-Regular',
-    textAlignVertical: 'top',
-		paddingBottom: 0,
-    marginBottom: 35,
-  },
-  searchContainer: {
-    flexDirection: 'row',
+	locationButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		borderWidth: 1,
+		borderColor: '#5EDFFF',
+		backgroundColor: '#263238',
+		paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderRadius: 8,
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#5EDFFF',
-    marginBottom: 10,
-  },
-	searchIcon: {
-    marginRight: 0,
-  },
-	searchInput: {
-    flex: 1,
-		paddingVertical: 0,
-    color: '#5EDFFF',
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-    
-		backgroundColor: '#031F2B',
-  },
-	listView:{
-		marginLeft: -20,
-	}, 
-	albumCoverContainer: {
-		marginTop: 15,
-	},
-  checkboxContainer: {
-    flexDirection: 'row',
-		marginTop: 10,
     marginBottom: 30,
   },
-  checkboxWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 17
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
+	formLabel: {
+		color: '#FFF',
+		fontSize: 16,
+		fontFamily: 'Poppins-Regular',
+		marginBottom: -5,
+	},
+	titleInput: {
+		borderBottomWidth: 1,
+		borderBottomColor: '#5EDFFF',
+		color: '#5EDFFF',
+		fontSize: 18,
+		fontFamily: 'Poppins-Regular',
+		paddingBottom: 0,
+		marginBottom: 35,
+	},
+	descriptionInput: {
+		borderBottomWidth: 1,
+		borderBottomColor: '#5EDFFF',
+		color: '#5EDFFF',
+		fontSize: 14,
+		fontFamily: 'Poppins-Regular',
+		textAlignVertical: 'top',
+		paddingBottom: 0,
+		marginBottom: 35,
+	},
+	albumCoverContainer: {},
+	checkboxContainer: {
+		flexDirection: 'row',
+		marginTop: 10,
+		marginBottom: 20,
+	},
+	checkboxWrapper: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginRight: 17
+	},
+	checkbox: {
+		width: 20,
+		height: 20,
 		justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#5EDFFF',
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  checkboxSelected: {
-    backgroundColor: '#5EDFFF',
-  },
-  checkboxLabel: {
-    color: '#FFF',
-    fontSize: 14,
-    fontFamily: 'Poppins-Regular',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  cancelButton: {
-    borderWidth: 1,
-    borderColor: '#5EDFFF',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    width: '48%',
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontFamily: 'Poppins-Regular',
-  },
-  saveButton: {
-    backgroundColor: '#5EDFFF',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    width: '48%',
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#031F2B',
-    fontSize: 16,
-    fontFamily: 'Poppins-SemiBold',
-  },
+		alignItems: 'center',
+		borderWidth: 1,
+		borderColor: '#5EDFFF',
+		borderRadius: 4,
+		marginRight: 8,
+	},
+	checkboxSelected: {
+		backgroundColor: '#5EDFFF',
+	},
+	checkboxLabel: {
+		color: '#FFF',
+		fontSize: 14,
+		fontFamily: 'Poppins-Regular',
+	},
+	actionButtons: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		marginTop: 10,
+	},
+	cancelButton: {
+		borderWidth: 1,
+		borderColor: '#5EDFFF',
+		borderRadius: 8,
+		paddingVertical: 12,
+		paddingHorizontal: 20,
+		width: '48%',
+		alignItems: 'center',
+	},
+	cancelButtonText: {
+		color: '#FFF',
+		fontSize: 16,
+		fontFamily: 'Poppins-Regular',
+	},
+	saveButton: {
+		backgroundColor: '#5EDFFF',
+		borderRadius: 8,
+		paddingVertical: 12,
+		paddingHorizontal: 20,
+		width: '48%',
+		alignItems: 'center',
+	},
+	saveButtonText: {
+		color: '#031F2B',
+		fontSize: 16,
+		fontFamily: 'Poppins-SemiBold',
+	},
 });
 
 export default NewPhoto;

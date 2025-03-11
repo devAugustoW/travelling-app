@@ -3,7 +3,6 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 import { View, SafeAreaView, KeyboardAvoidingView, ScrollView, FlatList, Platform, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import 'react-native-get-random-values';
 
 const NewPhoto = ({ route, navigation }) => {
@@ -24,6 +23,7 @@ const NewPhoto = ({ route, navigation }) => {
 
 	// Função para atualizar campos específicos
 	const updatePhotoData = useCallback((field, value) => {
+		console.log(`Atualizando ${field}:`, value);
 		setPhotoData((prev) => ({ ...prev, [field]: value }));
 	}, []);
 
@@ -75,6 +75,10 @@ const NewPhoto = ({ route, navigation }) => {
 		}
 	};
 
+	  // Navegar para InputPhotoLocation e definir updatePhotoData
+		const navigateToInputPhotoLocation = () => {
+			navigation.navigate('InputPhotoLocation', { updatePhotoData });
+		};
 
 
 	return (
@@ -101,8 +105,6 @@ const NewPhoto = ({ route, navigation }) => {
 						)}
 					</View>
 
-
-
 					{/* Botões de seleção de foto */}
 					<View style={styles.buttonsContainer}>
 						<TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
@@ -117,9 +119,11 @@ const NewPhoto = ({ route, navigation }) => {
 					{/* Botão para adicionar localização */}
 					<TouchableOpacity
 						style={styles.locationButton}
-						onPress={() => navigation.navigate('InputPhotoLocation', { updatePhotoData })}
+						onPress={navigateToInputPhotoLocation}
 					>
-						<Text style={styles.buttonText}>Selecionar Localização</Text>
+						<Text style={styles.buttonText}>
+              {photoData.nameLocation || 'Selecionar Localização'}
+            </Text>
 						<Feather name="chevron-right" size={18} color="#FFF" />
 					</TouchableOpacity>
 
@@ -145,9 +149,6 @@ const NewPhoto = ({ route, navigation }) => {
 							value={photoData.description}
 							onChangeText={(text) => updatePhotoData('description', text)}
 						/>
-
-
-
 
 						{/* Seção definir capa do álbum */}
 						<View style={styles.albumCoverContainer}>
@@ -185,7 +186,6 @@ const NewPhoto = ({ route, navigation }) => {
 							</TouchableOpacity>
 						</View>
 					</View>
-
 				</ScrollView>
 			</KeyboardAvoidingView>
 		</SafeAreaView>

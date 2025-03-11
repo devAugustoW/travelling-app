@@ -14,6 +14,7 @@ import CreateAlbum from '../screens/CreateAlbum';
 import UserProfile from '../screens/UserProfile';
 import Album from '../screens/Album';
 import NewPhoto from '../screens/NewPhoto';
+import InputPhotoLocation from '../screens/InputPhotoLocation';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -175,6 +176,7 @@ const AppNavigator = () => {
         />
 				<Stack.Screen name="Album" component={Album} />
 				<Stack.Screen name="NewPhoto" component={NewPhoto} />
+				<Stack.Screen name="InputPhotoLocation" component={InputPhotoLocation} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -4,12 +4,13 @@ import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL, CLOUD_UPLOAD_PRESET, CLOUD_NAME, CLOUDINARY_URL } from '@env';
+import { API_URL, CLOUD_UPLOAD_PRESET, CLOUD_NAME } from '@env';
 
 const NewPhoto = ({ route, navigation }) => {
 	const { albumId } = route.params || {};
 	const [isLoading, setIsLoading] = useState(false);
 	const [userId, setUserId] = useState(null);
+	const [token, setToken] = useState(null);
 	const [photoData, setPhotoData] = useState({
 		image: null,
 		title: '',
@@ -27,11 +28,19 @@ const NewPhoto = ({ route, navigation }) => {
 		useEffect(() => {
 			const fetchUserId = async () => {
 				try {
+					// Buscar dados do usuário
 					const userDataString = await AsyncStorage.getItem('@user_data');
 					if (userDataString) {
 						const userData = JSON.parse(userDataString);
 						setUserId(userData._id); 
 					}
+
+					// Buscar token de autenticação
+					const authToken = await AsyncStorage.getItem('@auth_token');
+					if (authToken) {
+						setToken(authToken);
+					}
+
 				} catch (error) {
 					console.log('Erro ao buscar ID do usuário:', error);
 				}
@@ -129,7 +138,46 @@ const NewPhoto = ({ route, navigation }) => {
         albumId: photoData.albumId,
       };
 
-      console.log('Dados da foto a serem enviados:', postData);
+			// Enviar para a API com o token de autenticação
+			const response = await axios.post(
+				`${API_URL}/posts`, 
+				postData,
+				{
+					headers: {
+						'Authorization': `Bearer ${token}`
+					}
+				}
+			);
+
+			// Mensagem de sucesso, limpar campos e navegar para Album
+			Alert.alert(
+				'Sucesso',
+				'Foto salva com sucesso!',
+				[
+					{
+						text: 'OK',
+						onPress: () => {
+							// Limpar os campos do formulário
+							setPhotoData({
+								image: null,
+								title: '',
+								description: '',
+								nameLocation: '',
+								location: {
+									latitude: null,
+									longitude: null
+								},
+								isCoverPhoto: false,
+								albumId: albumId,
+							});
+							
+							// Navegar de volta para a tela do álbum
+							navigation.navigate('Album', { albumId: photoData.albumId });
+						}
+					}
+				]
+			);
+
 
 		} catch (error) {
 			console.error('Erro ao salvar foto:', error);

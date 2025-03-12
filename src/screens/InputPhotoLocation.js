@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { Feather } from '@expo/vector-icons';
 import { GOOGLE_MAPS_API_KEY } from '@env';
+import 'react-native-get-random-values';
 
 const InputPhotoLocation = ({ navigation, route }) => {
   const { updatePhotoData } = route.params;

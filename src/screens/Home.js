@@ -4,7 +4,6 @@ import { API_URL } from '@env';
 import { useState, useEffect } from 'react';
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -67,30 +66,6 @@ const Home = () => {
     },
   ];
 
-  const featuredPhotos = [
-    {
-      id: '1',
-      title: 'Mount Bromo',
-      location: 'East Java',
-      image: require('../assets/images/praia.png'),
-      rating: '4.7'
-    },
-		{
-      id: '2',
-      title: 'Mount Bromo',
-      location: 'East Java',
-      image: require('../assets/images/praia.png'),
-      rating: '4.7'
-    },
-		{
-      id: '3',
-      title: 'Mount Bromo',
-      location: 'East Java',
-      image: require('../assets/images/praia.png'),
-      rating: '4.7'
-    },
-    
-  ];
 
 	// recupera os dados no AsyncStorage
 	useEffect(() => {
@@ -214,7 +189,7 @@ const Home = () => {
             <TouchableOpacity 
               key={album._id} 
               style={styles.featuredCard}
-              onPress={() => navigation.navigate('Album', { albumId: album._id })}
+							onPress={() => navigation.navigate('Album', { albumId: album._id })}
             >
               <Image 
                 source={

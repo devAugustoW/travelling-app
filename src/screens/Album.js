@@ -195,7 +195,7 @@ const Album = ({ route }) => {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.photoButton}
-						onPress={() => navigation.navigate('NewPhoto')}>
+						onPress={() =>  navigation.navigate('NewPhoto', { albumId })}>
             <Text style={[styles.buttonText, styles.photoButtonText]}>Foto</Text>
           </TouchableOpacity>
         </View>

@@ -1,13 +1,15 @@
-import React, { useState, useCallback, memo } from 'react';
-import { GOOGLE_MAPS_API_KEY } from '@env';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, SafeAreaView, KeyboardAvoidingView, ScrollView, FlatList, Platform, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
-import 'react-native-get-random-values';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_URL, CLOUD_UPLOAD_PRESET, CLOUD_NAME, CLOUDINARY_URL } from '@env';
 
 const NewPhoto = ({ route, navigation }) => {
 	const { albumId } = route.params || {};
 	const [isLoading, setIsLoading] = useState(false);
+	const [userId, setUserId] = useState(null);
 	const [photoData, setPhotoData] = useState({
 		image: null,
 		title: '',
@@ -21,9 +23,25 @@ const NewPhoto = ({ route, navigation }) => {
 		albumId: albumId,
 	});
 
+	  // Recupera o ID do usuário do AsyncStorage
+		useEffect(() => {
+			const fetchUserId = async () => {
+				try {
+					const userDataString = await AsyncStorage.getItem('@user_data');
+					if (userDataString) {
+						const userData = JSON.parse(userDataString);
+						setUserId(userData._id); 
+					}
+				} catch (error) {
+					console.log('Erro ao buscar ID do usuário:', error);
+				}
+			};
+	
+			fetchUserId();
+		}, []);
+
 	// Função para atualizar campos específicos
 	const updatePhotoData = useCallback((field, value) => {
-		console.log(`Atualizando ${field}:`, value);
 		setPhotoData((prev) => ({ ...prev, [field]: value }));
 	}, []);
 
@@ -50,6 +68,33 @@ const NewPhoto = ({ route, navigation }) => {
 			});
 	};
 
+	// Função upload Cloudinary
+	const uploadImageToCloudinary = async (imageUri) => {
+		const data = new FormData();
+		data.append('file', {
+			uri: imageUri,
+			type: 'image/jpeg', 
+			name: 'upload.jpg', 
+		});
+		data.append('upload_preset', CLOUD_UPLOAD_PRESET); 
+		data.append('cloud_name', CLOUD_NAME); 
+
+		try {
+			const response = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, data, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			});
+	
+			const result = response.data;
+			return result; 
+
+		} catch (error) {
+			console.error('Erro ao fazer upload da imagem:', error);
+			throw error;
+		}
+	};
+
 	// Função para salvar a foto
 	const handleSavePhoto = async () => {
 		setIsLoading(true);
@@ -59,13 +104,32 @@ const NewPhoto = ({ route, navigation }) => {
 				Alert.alert('Erro', 'Selecione uma imagem');
 				return;
 			}
-
 			if (!photoData.title) {
 				Alert.alert('Erro', 'Adicione um título para a foto');
 				return;
 			}
 
-			console.log('Dados da foto a serem enviados:', photoData);
+			// Cloudinary -> Upload e extrair
+			const cloudinaryResponse = await uploadImageToCloudinary(photoData.image);
+			const imageUrl = cloudinaryResponse.secure_url;
+
+			// Preparar os dados para envio
+      const postData = {
+        imagem: imageUrl,
+        title: photoData.title,
+        description: photoData.description,
+        nota: 0, 
+        cover: photoData.isCoverPhoto,
+        nameLocation: photoData.nameLocation,
+        location: {
+          latitude: photoData.location.latitude,
+          longitude: photoData.location.longitude,
+        },
+        userId: userId,
+        albumId: photoData.albumId,
+      };
+
+      console.log('Dados da foto a serem enviados:', postData);
 
 		} catch (error) {
 			console.error('Erro ao salvar foto:', error);
@@ -75,10 +139,10 @@ const NewPhoto = ({ route, navigation }) => {
 		}
 	};
 
-	  // Navegar para InputPhotoLocation e definir updatePhotoData
-		const navigateToInputPhotoLocation = () => {
-			navigation.navigate('InputPhotoLocation', { updatePhotoData });
-		};
+	// Navegar para InputPhotoLocation e definir updatePhotoData
+	const navigateToInputPhotoLocation = () => {
+		navigation.navigate('InputPhotoLocation', { updatePhotoData });
+	};
 
 
 	return (

@@ -18,11 +18,16 @@ import MapView, { Marker } from 'react-native-maps';
 import axios from 'axios';
 import { API_URL } from '@env';
 
+import RatingModal from '../components/RatingModal';
+
 const Album = ({ route }) => {
   const { albumId } = route.params;
   const [album, setAlbum] = useState(null);
 	const [posts, setPosts] = useState([]);
+	const [token, setToken] = useState(null);
 	const [locationCaptured, setLocationCaptured] = useState(false);
+	const [modalVisible, setModalVisible] = useState(false);
+	const [selectedPost, setSelectedPost] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const navigation = useNavigation();
 
@@ -37,6 +42,7 @@ const Album = ({ route }) => {
           Alert.alert('Erro', 'Você precisa estar logado');
           return;
         }
+				setToken(token);
 
         // Faz a requisição para buscar os dados do álbum
         const albumResponse = await axios.get(`${API_URL}/albums/${albumId}`, {
@@ -97,6 +103,42 @@ const Album = ({ route }) => {
     } catch (error) {
       console.log('Erro ao capturar localização:', error);
       Alert.alert('Erro', 'Não foi possível capturar a localização.');
+    }
+  };
+
+	// Função para abrir o modal de avaliação
+	const openRatingModal = (post) => {
+		setSelectedPost(post);
+		setModalVisible(true);
+	};
+
+	// Função para salvar a avaliação
+  const saveRating = async (rating) => {
+    try {
+      if (!selectedPost) return;
+      
+      // Fazer a requisição para atualizar a nota do post
+      await axios.patch(
+        `${API_URL}/posts/${selectedPost._id}`, 
+        { nota: rating },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Atualizar o estado local
+      const updatedPosts = posts.map(post => 
+        post._id === selectedPost._id ? {...post, nota: rating} : post
+      );
+      setPosts(updatedPosts);
+      
+      // Fechar o modal
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Erro ao salvar avaliação:', error);
+      Alert.alert('Erro', 'Não foi possível salvar a avaliação');
     }
   };
 
@@ -186,14 +228,16 @@ const Album = ({ route }) => {
                 
                 {/* Informações do post */}
                 <View style={styles.postInfoContainer}>
-                  <View style={styles.postHeader}>
-                    <Text style={styles.postTitle}>{post.title}</Text>
-                    <View style={styles.postRating}>
-                      <Text style={styles.postGrade}>{post.nota || '0.0'}</Text>
-                      <Feather name="star" size={24} color="#FFD700" />
-                    </View>
-                  </View>
-                  
+								<View style={styles.postHeader}>
+									<Text style={styles.postTitle}>{post.title}</Text>
+									<TouchableOpacity 
+										style={styles.postRating}
+										onPress={() => openRatingModal(post)}
+									>
+										<Text style={styles.postGrade}>{post.nota || '0.0'}</Text>
+										<Feather name="star" size={24} color="#FFD700" />
+									</TouchableOpacity>
+								</View>
                   <Text style={styles.postDescription}>{post.description}</Text>
                 </View>
                 
@@ -254,6 +298,15 @@ const Album = ({ route }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+			{/* componente RatingModal */}
+			<RatingModal 
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={saveRating}
+        initialRating={selectedPost?.nota || 0}
+      />
+
     </SafeAreaView>
   );
 };

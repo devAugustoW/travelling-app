@@ -21,43 +21,57 @@ import { API_URL } from '@env';
 const Album = ({ route }) => {
   const { albumId } = route.params;
   const [album, setAlbum] = useState(null);
+	const [posts, setPosts] = useState([]);
 	const [locationCaptured, setLocationCaptured] = useState(false);
+	const [loading, setLoading] = useState(true);
 	const navigation = useNavigation();
 
-	// busca os dados do álbum
+  // busca os dados do álbum e seus posts
   useEffect(() => {
-    const fetchAlbumData = async () => {
+    const fetchData = async () => {
       try {
-				// Pega o token do AsyncStorage
-				const token = await AsyncStorage.getItem('@auth_token');
-				if (!token) {
-					Alert.alert('Erro', 'Você precisa estar logado');
-					return;
-				}
-	
-				// Faz a requisição para buscar os dados do álbum
-				const response = await axios.get(`${API_URL}/albums/${albumId}`, {
-					headers: {
-						'Authorization': `Bearer ${token}`
-					}
-				});
-				setAlbum(response.data);
+        setLoading(true);
+        // Pega o token do AsyncStorage
+        const token = await AsyncStorage.getItem('@auth_token');
+        if (!token) {
+          Alert.alert('Erro', 'Você precisa estar logado');
+          return;
+        }
 
-				// Atualiza o estado de localização capturada
-				if (response.data.location) {
-					setLocationCaptured(true);
-				}
+        // Faz a requisição para buscar os dados do álbum
+        const albumResponse = await axios.get(`${API_URL}/albums/${albumId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        setAlbum(albumResponse.data);
 
-			} catch (error) {
-				console.log('Erro ao buscar dados do álbum:', error);
-				Alert.alert('Erro', 'Não foi possível carregar os dados do álbum.');
-			}
-		};
-	
-		fetchAlbumData();
-	}, [albumId]);
+        // Atualiza o estado de localização capturada
+        if (albumResponse.data.location) {
+          setLocationCaptured(true);
+        }
+				
 
-  if (!album) {
+        // Faz a requisição para buscar os posts do álbum
+        const postsResponse = await axios.get(`${API_URL}/albums/${albumId}/posts`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        setPosts(postsResponse.data);
+
+      } catch (error) {
+        console.log('Erro ao buscar dados:', error);
+        Alert.alert('Erro', 'Não foi possível carregar os dados do álbum e seus posts.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [albumId]);
+
+  if (loading || !album) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.loadingText}>Carregando...</Text>
@@ -65,7 +79,7 @@ const Album = ({ route }) => {
     );
   }
 
-	// função para capturar a localização
+	// função para capturar a localização do álbum
 	const handleCheckIn = async () => {
     try {
 			// executa solicitação de permissão
@@ -152,6 +166,44 @@ const Album = ({ route }) => {
         <View style={styles.aboutContainer}>
           <Text style={styles.sectionTitle}>Sobre</Text>
           <Text style={styles.description}>{album.description || 'Sem descrição'}</Text>
+        </View>
+
+				{/* Posts do álbum */}
+				<View style={styles.postsContainer}>
+          <Text style={styles.sectionTitle}>Posts</Text>
+          
+          {posts && posts.length > 0 ? (
+            posts.map((post, index) => (
+              <View key={post._id || index} style={styles.postItem}>
+                {/* Imagem do post */}
+                <Image 
+                  source={{ uri: post.imagem }} 
+                  style={styles.postImage}
+                  resizeMode="cover"
+                />
+                
+                {/* Informações do post */}
+                <View style={styles.postInfoContainer}>
+                  <View style={styles.postHeader}>
+                    <Text style={styles.postTitle}>{post.title}</Text>
+                    <View style={styles.postRating}>
+                      <Text style={styles.postGrade}>{post.nota || '0.0'}</Text>
+                      <Feather name="star" size={18} color="#FFD700" />
+                    </View>
+                  </View>
+                  
+                  <Text style={styles.postDescription}>{post.description}</Text>
+                </View>
+                
+                {/* Separador entre posts (exceto o último) */}
+                {index < posts.length - 1 && (
+                  <View style={styles.separator} />
+                )}
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noPostsText}>Nenhuma foto adicionada ainda</Text>
+          )}
         </View>
 
         {/* Separador */}
@@ -301,6 +353,57 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins-Regular',
     lineHeight: 20,
+  },
+	postsContainer: {
+    padding: 20,
+  },
+  postItem: {
+    marginBottom: 20,
+  },
+  postImage: {
+    width: '100%',
+    height: 250,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  postInfoContainer: {
+    paddingHorizontal: 5,
+  },
+  postHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  postTitle: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
+    flex: 1,
+  },
+  postRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: 5,
+  },
+  postGrade: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
+  },
+  postDescription: {
+    color: '#B1AEAE',
+    fontSize: 14,
+    fontFamily: 'Poppins-Regular',
+    marginBottom: 10,
+  },
+	noPostsText: {
+    color: '#B1AEAE',
+    fontSize: 14,
+    fontFamily: 'Poppins-Regular',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 10,
   },
   mapContainer: {
     padding: 20,

@@ -51,7 +51,6 @@ const Album = ({ route }) => {
           setLocationCaptured(true);
         }
 				
-
         // Faz a requisição para buscar os posts do álbum
         const postsResponse = await axios.get(`${API_URL}/albums/${albumId}/posts`, {
           headers: {
@@ -111,7 +110,7 @@ const Album = ({ route }) => {
 				<View style={{ position: 'relative' }}>
 					{album.cover ? (
 						<Image 
-							source={{ uri: album.cover }} 
+							source={{ uri: posts.find(post => post.cover === true).imagem }}  
 							style={styles.coverImage}
 							resizeMode="cover"
 						/>
@@ -170,11 +169,14 @@ const Album = ({ route }) => {
 
 				{/* Posts do álbum */}
 				<View style={styles.postsContainer}>
-          <Text style={styles.sectionTitle}>Posts</Text>
           
           {posts && posts.length > 0 ? (
             posts.map((post, index) => (
-              <View key={post._id || index} style={styles.postItem}>
+              <View key={post._id || index} 
+							style={[
+								styles.postItem,
+								index > 0 && styles.postItemWithMargin 
+							]}>
                 {/* Imagem do post */}
                 <Image 
                   source={{ uri: post.imagem }} 
@@ -188,7 +190,7 @@ const Album = ({ route }) => {
                     <Text style={styles.postTitle}>{post.title}</Text>
                     <View style={styles.postRating}>
                       <Text style={styles.postGrade}>{post.nota || '0.0'}</Text>
-                      <Feather name="star" size={18} color="#FFD700" />
+                      <Feather name="star" size={24} color="#FFD700" />
                     </View>
                   </View>
                   
@@ -219,8 +221,8 @@ const Album = ({ route }) => {
 								initialRegion={{
 									latitude: album.location.latitude,
 									longitude: album.location.longitude,
-									latitudeDelta: 0.25,
-									longitudeDelta: 0.25,
+									latitudeDelta: 0.10,
+									longitudeDelta: 0.10,
 								}}
 							>
 								<Marker
@@ -274,6 +276,8 @@ const styles = StyleSheet.create({
   coverImage: {
     width: '100%',
     height: 300,
+		borderBottomLeftRadius: 30,
+		borderBottomRightRadius: 30,
   },
   coverGradient: {
     width: '100%',
@@ -289,18 +293,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
+		paddingBottom: 10,
     borderRadius: 8,
 		zIndex: 100,
 	},
 	albumTitle: {
     color: '#FFF',
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Poppins-Medium',
   },
   albumGrade: {
     color: '#FFF',
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: 'Poppins-Medium',
   },
   ratingContainer: {
@@ -314,6 +318,7 @@ const styles = StyleSheet.create({
   },
   infoItem: {
     alignItems: 'center',
+		marginTop: 10,
   },
 	iconBackground: {
     backgroundColor: '#263238',
@@ -346,7 +351,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontFamily: 'Poppins-Medium',
-    marginBottom: 10,
+    marginBottom: 2,
   },
   description: {
     color: '#B1AEAE',
@@ -356,18 +361,23 @@ const styles = StyleSheet.create({
   },
 	postsContainer: {
     padding: 20,
+		paddingBottom: 10,
   },
   postItem: {
-    marginBottom: 20,
-  },
-  postImage: {
-    width: '100%',
-    height: 250,
-    borderRadius: 10,
     marginBottom: 10,
+  },
+	postItemWithMargin: {
+		marginTop:20,
+	},
+  postImage: {
+    width: 'auto',
+    height: 450,
+    borderRadius: 10,
+    marginBottom: 15,
   },
   postInfoContainer: {
     paddingHorizontal: 5,
+		marginBottom: 5,
   },
   postHeader: {
     flexDirection: 'row',
@@ -377,7 +387,7 @@ const styles = StyleSheet.create({
   },
   postTitle: {
     color: '#FFF',
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: 'Poppins-Medium',
     flex: 1,
   },
@@ -388,14 +398,14 @@ const styles = StyleSheet.create({
   },
   postGrade: {
     color: '#FFF',
-    fontSize: 16,
+    fontSize: 20,
     fontFamily: 'Poppins-Medium',
   },
   postDescription: {
     color: '#B1AEAE',
     fontSize: 14,
     fontFamily: 'Poppins-Regular',
-    marginBottom: 10,
+    marginBottom: 5,
   },
 	noPostsText: {
     color: '#B1AEAE',
@@ -407,6 +417,7 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     padding: 20,
+		
   },
 	mapWrapper: {
 		borderRadius: 10,

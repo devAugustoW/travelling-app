@@ -113,34 +113,34 @@ const Album = ({ route }) => {
 	};
 
 	// Função para salvar a avaliação
-  const saveRating = async (rating) => {
-    try {
-      if (!selectedPost) return;
-      
-      // Fazer a requisição para atualizar a nota do post
-      await axios.patch(
-        `${API_URL}/posts/${selectedPost._id}`, 
-        { nota: rating },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      
-      // Atualizar o estado local
-      const updatedPosts = posts.map(post => 
-        post._id === selectedPost._id ? {...post, nota: rating} : post
-      );
-      setPosts(updatedPosts);
-      
-      // Fechar o modal
-      setModalVisible(false);
-    } catch (error) {
-      console.error('Erro ao salvar avaliação:', error);
-      Alert.alert('Erro', 'Não foi possível salvar a avaliação');
-    }
-  };
+	const saveRating = async (rating) => {
+		try {
+			if (!selectedPost) return;
+			
+			// atualiza a nota
+			await axios.patch(
+				`${API_URL}/posts/${selectedPost._id}/nota`, 
+				{ nota: rating },
+				{
+					headers: {
+						'Authorization': `Bearer ${token}`
+					}
+				}
+			);
+			
+			// atualiza o estado local
+			const updatedPosts = posts.map(post => 
+				post._id === selectedPost._id ? {...post, nota: rating} : post
+			);
+			setPosts(updatedPosts);
+			
+			// fecha o modal
+			setModalVisible(false);
+		} catch (error) {
+			console.error('Erro ao salvar avaliação:', error);
+			Alert.alert('Erro', 'Não foi possível salvar a avaliação');
+		}
+	};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -234,7 +234,9 @@ const Album = ({ route }) => {
 										style={styles.postRating}
 										onPress={() => openRatingModal(post)}
 									>
-										<Text style={styles.postGrade}>{post.nota || '0.0'}</Text>
+										<Text style={styles.postGrade}>
+											{post.nota ? `${post.nota}.0`.replace('.0.0', '.0') : '0.0'}
+										</Text>
 										<Feather name="star" size={24} color="#FFD700" />
 									</TouchableOpacity>
 								</View>

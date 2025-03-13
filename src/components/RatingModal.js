@@ -11,9 +11,10 @@ import { Feather } from '@expo/vector-icons';
 const RatingModal = ({ 
   visible, 
   onClose, 
+	onSave,
   initialRating = 0 
 }) => {
-  // 
+  // Armazena a nota selecionada
   const [rating, setRating] = useState(initialRating);
 
   // Atualiza o rating quando o initialRating muda
@@ -22,7 +23,9 @@ const RatingModal = ({
   }, [initialRating]);
 
   // Função para confirmar a nota
-  const handleConfirm = () => {};
+  const handleConfirm = () => {
+		onSave(rating);
+	};
 
   // Renderiza as 5 estrelas
   const renderStars = () => {

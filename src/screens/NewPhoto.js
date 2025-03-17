@@ -211,7 +211,10 @@ const NewPhoto = ({ route, navigation }) => {
 					{/* Área de preview da foto */}
 					<View style={styles.imagePreview}>
 						{photoData.image ? (
-							<Image source={{ uri: photoData.image }} style={styles.image} />
+							<Image 
+								source={{ uri: photoData.image }} 
+								style={styles.image} 
+								resizeMode="cover"/>
 						) : (
 							<Text style={styles.placeholder}>Nenhuma foto selecionada</Text>
 						)}
@@ -326,7 +329,7 @@ const styles = StyleSheet.create({
 	},
 	imagePreview: {
 		width: '100%',
-		height: 450,
+		height: 400,
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#333',

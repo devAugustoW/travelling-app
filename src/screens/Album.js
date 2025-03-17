@@ -116,8 +116,10 @@ const Album = ({ route }) => {
 	const saveRating = async (rating) => {
 		try {
 			if (!selectedPost) return;
+
+			console.log('Salvando avaliação:', rating);
 			
-			// atualiza a grade (anteriormente nota)
+			// atualiza a grade do post
 			await axios.patch(
 				`${API_URL}/posts/${selectedPost._id}/grade`, 
 				{ grade: rating },
@@ -127,12 +129,30 @@ const Album = ({ route }) => {
 					}
 				}
 			);
+
+			console.log('Grade do post atualizado com sucesso');
 			
-			// atualiza o estado local
+			// atualiza o estado local dos posts
 			const updatedPosts = posts.map(post => 
 				post._id === selectedPost._id ? {...post, grade: rating} : post
 			);
 			setPosts(updatedPosts);
+
+			console.log('Buscando dados atualizados do álbum...');
+			
+			// Busca novamente os dados do álbum para obter o grade atualizado
+			const albumResponse = await axios.get(`${API_URL}/albums/${albumId}`, {
+				headers: {
+					'Authorization': `Bearer ${token}`
+				}
+			});
+
+			console.log('Dados do álbum recebidos:', albumResponse.data);
+    	console.log('Grade do álbum no backend:', albumResponse.data.grade);
+
+			setAlbum(albumResponse.data);
+
+			console.log('Estado do álbum atualizado. Novo grade:', albumResponse.data.grade);
 			
 			// fecha o modal
 			setModalVisible(false);
@@ -167,7 +187,9 @@ const Album = ({ route }) => {
 					<View style={styles.coverOverlay}>
 						<Text style={styles.albumTitle}>{album.title}</Text>
 						<View style={styles.ratingContainer}>
-								<Text style={styles.albumGrade}>{album.grade || '0.0'}</Text>
+								<Text style={styles.albumGrade}>
+								{album.grade ? `${album.grade}` : '0.0'}
+								</Text>
 							<Feather name="star" size={24} color="#FFD700" />
 						</View>
 					</View>

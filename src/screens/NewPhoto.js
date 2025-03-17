@@ -127,7 +127,7 @@ const NewPhoto = ({ route, navigation }) => {
         imagem: imageUrl,
         title: photoData.title,
         description: photoData.description,
-        nota: 0, 
+        grade: 0,
         cover: photoData.isCoverPhoto,
         nameLocation: photoData.nameLocation,
         location: {

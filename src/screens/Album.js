@@ -117,10 +117,10 @@ const Album = ({ route }) => {
 		try {
 			if (!selectedPost) return;
 			
-			// atualiza a nota
+			// atualiza a grade (anteriormente nota)
 			await axios.patch(
-				`${API_URL}/posts/${selectedPost._id}/nota`, 
-				{ nota: rating },
+				`${API_URL}/posts/${selectedPost._id}/grade`, 
+				{ grade: rating },
 				{
 					headers: {
 						'Authorization': `Bearer ${token}`
@@ -130,7 +130,7 @@ const Album = ({ route }) => {
 			
 			// atualiza o estado local
 			const updatedPosts = posts.map(post => 
-				post._id === selectedPost._id ? {...post, nota: rating} : post
+				post._id === selectedPost._id ? {...post, grade: rating} : post
 			);
 			setPosts(updatedPosts);
 			
@@ -235,7 +235,7 @@ const Album = ({ route }) => {
 										onPress={() => openRatingModal(post)}
 									>
 										<Text style={styles.postGrade}>
-											{post.nota ? `${post.nota}.0`.replace('.0.0', '.0') : '0.0'}
+											{post.grade ? `${post.grade}.0`.replace('.0.0', '.0') : '0.0'}
 										</Text>
 										<Feather name="star" size={24} color="#FFD700" />
 									</TouchableOpacity>
@@ -306,7 +306,7 @@ const Album = ({ route }) => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onSave={saveRating}
-        initialRating={selectedPost?.nota || 0}
+        initialRating={selectedPost?.grade || 0}
       />
     </SafeAreaView>
   );

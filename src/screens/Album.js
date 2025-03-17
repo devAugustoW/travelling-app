@@ -116,8 +116,6 @@ const Album = ({ route }) => {
 	const saveRating = async (rating) => {
 		try {
 			if (!selectedPost) return;
-
-			console.log('Salvando avaliação:', rating);
 			
 			// atualiza a grade do post
 			await axios.patch(
@@ -129,16 +127,12 @@ const Album = ({ route }) => {
 					}
 				}
 			);
-
-			console.log('Grade do post atualizado com sucesso');
 			
 			// atualiza o estado local dos posts
 			const updatedPosts = posts.map(post => 
 				post._id === selectedPost._id ? {...post, grade: rating} : post
 			);
 			setPosts(updatedPosts);
-
-			console.log('Buscando dados atualizados do álbum...');
 			
 			// Busca novamente os dados do álbum para obter o grade atualizado
 			const albumResponse = await axios.get(`${API_URL}/albums/${albumId}`, {
@@ -146,13 +140,7 @@ const Album = ({ route }) => {
 					'Authorization': `Bearer ${token}`
 				}
 			});
-
-			console.log('Dados do álbum recebidos:', albumResponse.data);
-    	console.log('Grade do álbum no backend:', albumResponse.data.grade);
-
 			setAlbum(albumResponse.data);
-
-			console.log('Estado do álbum atualizado. Novo grade:', albumResponse.data.grade);
 			
 			// fecha o modal
 			setModalVisible(false);

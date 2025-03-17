@@ -188,7 +188,11 @@ const Album = ({ route }) => {
 						<Text style={styles.albumTitle}>{album.title}</Text>
 						<View style={styles.ratingContainer}>
 								<Text style={styles.albumGrade}>
-								{album.grade ? `${album.grade}` : '0.0'}
+								{album.grade 
+									? Number.isInteger(album.grade) 
+										? `${album.grade}.0` 
+										: album.grade.toFixed(1) 
+									: '0.0'}
 								</Text>
 							<Feather name="star" size={24} color="#FFD700" />
 						</View>

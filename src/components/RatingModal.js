@@ -25,6 +25,7 @@ const RatingModal = ({
   // Função para confirmar a nota
   const handleConfirm = () => {
 		onSave(rating);
+		onClose();
 	};
 
   // Renderiza as 5 estrelas

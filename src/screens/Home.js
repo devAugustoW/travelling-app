@@ -87,14 +87,17 @@ const Home = () => {
 	// Busca os álbuns do usuário
   const fetchUserAlbums = async () => {
     try {
+			// recupera o token do AsyncStorage
       const token = await AsyncStorage.getItem('@auth_token');
-      
+
+			// recupera os álbuns do usuário
       const response = await axios.get(`${API_URL}/user/albums`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
+			// armazena os álbuns do usuário
       setUserAlbums(response.data.albums);
       setLoading(false);
 			
@@ -182,36 +185,35 @@ const Home = () => {
 					/>
 				</View>
 
-				{/* Melhores destinos */}
+				{/* Destinos */}
 				<View style={styles.section}>
-          <Text style={styles.sectionTitle}>Melhores Destinos</Text>
+          <Text style={styles.sectionTitle}>Destinos</Text>
           {userAlbums.map((album) => (
-            <TouchableOpacity 
-              key={album._id} 
-              style={styles.featuredCard}
+						<TouchableOpacity 
+							key={album._id} 
+							style={styles.featuredCard}
 							onPress={() => navigation.navigate('Album', { albumId: album._id })}
-            >
-              <Image 
-                source={
-                  album.cover?.imageUrl 
-                    ? { uri: album.cover.imageUrl }
-                    : require('../assets/images/placeholder.png')
-                } 
-                style={styles.featuredImage} 
-                resizeMode="contain"
-              />
-              <View style={styles.featuredInfo}>
-                <View>
+						>
+							<Image 
+								source={
+									album.cover?.imagem
+										? { uri: album.cover.imagem }
+										: require('../assets/images/placeholder.png')
+								} 
+								style={styles.featuredImage} 
+							/>
+							<View style={styles.featuredInfo}>
+								<View>
 									<Text style={styles.featuredTitle}>{album.title}</Text>
 									<Text style={styles.featuredDestination}>{album.destination}</Text>
-                </View>
-                <View style={styles.ratingContainer}>
-                  <Text style={styles.rating}>{album.grade || '0.0'}</Text>
-                  <MaterialIcons name="star" size={24} color="#FFD700" />
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+								</View>
+								<View style={styles.ratingContainer}>
+									<Text style={styles.rating}>{album.grade || '0.0'}</Text>
+									<MaterialIcons name="star" size={24} color="#FFD700" />
+								</View>
+							</View>
+						</TouchableOpacity>
+					))}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -338,15 +340,16 @@ const styles = StyleSheet.create({
 		height: 150,
     marginBottom: 15,
     borderRadius: 8,
-    overflow: 'hidden',
-		position: 'relative',
 		marginBottom: 5,
+		overflow: 'hidden',
+		position: 'relative',
+		backgroundColor: 'red',
   },
   featuredImage: {
     width: '100%',
-    height: 150,
-		cover: 'contain',
+    height: '100%',
     borderRadius: 8,
+		resizeMode: "cover",
   },
   featuredInfo: {
 		width: '100%',

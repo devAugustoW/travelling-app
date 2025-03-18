@@ -225,20 +225,20 @@ const Album = ({ route }) => {
 
 				{/* Posts do álbum */}
 				<View style={styles.postsContainer}>
-          
           {posts && posts.length > 0 ? (
             posts.map((post, index) => (
-              <View key={post._id || index} 
-							style={[
-								styles.postItem,
-								index > 0 && styles.postItemWithMargin 
-							]}>
-                {/* Imagem do post */}
-                <Image 
-                  source={{ uri: post.imagem }} 
-                  style={styles.postImage}
-                  resizeMode="cover"
-                />
+              <View 
+								key={post._id || index} 
+								style={[
+									styles.postItem,
+									index > 0 && styles.postItemWithMargin 
+								]}>
+                	{/* Imagem do post */}
+                	<Image 
+										source={{ uri: post.imagem }} 
+										style={styles.postImage}
+										resizeMode="cover"
+									/>
                 
                 {/* Informações do post */}
                 <View style={styles.postInfoContainer}>

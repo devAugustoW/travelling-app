@@ -29,6 +29,8 @@ const Login = ({ navigation }) => {
 
       setLoading(true);
 
+			console.log(API_URL);
+
 			// faz a chamada de login no backend
       const response = await axios.post(`${API_URL}/login`, {
         email,

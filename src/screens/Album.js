@@ -31,12 +31,12 @@ const Album = ({ route }) => {
 	const [loading, setLoading] = useState(true);
 	const navigation = useNavigation();
 
-  // busca os dados do álbum e seus posts
+  // Busca os dados do álbum e seus posts
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Pega o token do AsyncStorage
+        // pega o token do AsyncStorage
         const token = await AsyncStorage.getItem('@auth_token');
         if (!token) {
           Alert.alert('Erro', 'Você precisa estar logado');
@@ -44,7 +44,7 @@ const Album = ({ route }) => {
         }
 				setToken(token);
 
-        // Faz a requisição para buscar os dados do álbum
+        // faz a requisição para buscar os dados do álbum
         const albumResponse = await axios.get(`${API_URL}/albums/${albumId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -52,12 +52,12 @@ const Album = ({ route }) => {
         });
         setAlbum(albumResponse.data);
 
-        // Atualiza o estado de localização capturada
+        // atualiza estado de localização capturada
         if (albumResponse.data.location) {
           setLocationCaptured(true);
         }
 				
-        // Faz a requisição para buscar os posts do álbum
+        // buscar os posts do álbum
         const postsResponse = await axios.get(`${API_URL}/albums/${albumId}/posts`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -87,7 +87,7 @@ const Album = ({ route }) => {
 	// função para capturar a localização do álbum
 	const handleCheckIn = async () => {
     try {
-			// executa solicitação de permissão
+			// solicitação de permissão
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permissão negada', 'Permissão para acessar localização foi negada.');

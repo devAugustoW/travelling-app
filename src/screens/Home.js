@@ -86,6 +86,7 @@ const Home = () => {
 	// Busca os álbuns do usuário
   const fetchUserAlbums = async () => {
     try {
+			setLoading(true);
 			// recupera o token do AsyncStorage
       const token = await AsyncStorage.getItem('@auth_token');
 
@@ -106,7 +107,7 @@ const Home = () => {
     }
   };
 
-	// Busca os dados quando o componente monta
+	// Busca os dados quando o componente é montado
 	useEffect(() => {
 		fetchUserAlbums();
 	}, []);

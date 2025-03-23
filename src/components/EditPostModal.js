@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 
-const EditModal = ({ visible, onClose, onSave, value, setValue, title }) => {
+const EditPostModal = ({ visible, onClose, onSave, value, setValue, title }) => {
   return (
     <Modal
       visible={visible}
@@ -99,4 +99,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditModal;
+export default EditPostModal;

@@ -17,25 +17,36 @@ import axios from 'axios';
 import { API_URL } from '@env';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import EditModal from '../components/EditModal';
+import EditPostModal from '../components/EditPostModal';
 import RatingModal from '../components/RatingModal';
 
 const Post = ({ route, navigation }) => {
   const { postId, albumId } = route.params;
-  const [post, setPost] = useState(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [isCover, setIsCover] = useState(false);
+  
+  const [postData, setPostData] = useState({
+		id: null,
+		title: '',
+		description: '',
+		cover: false,
+		grade: 0,
+		nameLocation: '',
+		location: null,
+		imagem: '',
+		createdAt: null
+	});
+  
+  // Estados de edição
+  const [editableTitle, setEditableTitle] = useState('');
+  const [editableDescription, setEditableDescription] = useState('');
+  
+  // Estados de visibilidade de modais
+  const [isTitleModalVisible, setTitleModalVisible] = useState(false);
+  const [isDescriptionModalVisible, setDescriptionModalVisible] = useState(false);
+  const [isRatingModalVisible, setRatingModalVisible] = useState(false);
+  const [isLocationModalVisible, setLocationModalVisible] = useState(false);
+  
+  // Estado de carregamento
   const [loading, setLoading] = useState(true);
-	const [isTitleModalVisible, setTitleModalVisible] = useState(false);
-	const [isDescriptionModalVisible, setDescriptionModalVisible] = useState(false)
-	const [editableTitle, setEditableTitle] = useState(title);
-	const [editableDescription, setEditableDescription] = useState(description);
-	const [isModalVisible, setModalVisible] = useState(false); 
-	const [isLocationModalVisible, setLocationModalVisible] = useState(false);
-	const [grade, setGrade] = useState(0);
-	const [nameLocation, setNameLocation] = useState('');
-	const [location, setLocation] = useState(null);
 
 	// careega os dados do Post
   useEffect(() => {
@@ -45,17 +56,30 @@ const Post = ({ route, navigation }) => {
 	// função para buscar os dados do Post
   const fetchPost = async () => {
     try {
+			// busca token no AsyncStorage
       const token = await AsyncStorage.getItem('@auth_token');
+
+			// busca dados do post
       const response = await axios.get(`${API_URL}/posts/${postId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      setPost(response.data);
-      setTitle(response.data.title);
-      setDescription(response.data.description);
-      setIsCover(response.data.cover);
-			setGrade(response.data.grade || 0);
-			setNameLocation(response.data.nameLocation || '');
-			setLocation(response.data.location || null);
+
+			// atualiza o estado postData
+			setPostData({
+				id: response.data.id,
+				title: response.data.title || '',
+				description: response.data.description || '',
+				cover: response.data.cover || false,
+				grade: response.data.grade || 0,
+				nameLocation: response.data.nameLocation || '',
+				location: response.data.location || null,
+				imagem: response.data.imagem || '',
+				createdAt: response.data.createdAt || new Date().toISOString()
+			});
+
+			// atualiza os estados editáveis
+			setEditableTitle(response.data.title || '');
+			setEditableDescription(response.data.description || '');
 
     } catch (error) {
       console.error('Erro ao buscar post:', error);
@@ -66,22 +90,27 @@ const Post = ({ route, navigation }) => {
     }
   };
 
-  const handleSave = async () => {
+	// função para salvar Edição
+  const handleEditSave = async () => {
     try {
-      const token = await AsyncStorage.getItem('@auth_token');
-      await axios.patch(`${API_URL}/posts/${postId}`, {
-        title,
-        description,
-        cover: isCover,
-        grade,
-        nameLocation,
-        location
-      }, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+			// busca o token no AsyncStorage
+			const token = await AsyncStorage.getItem('@auth_token');
 
-      Alert.alert('Sucesso', 'Post atualizado com sucesso');
-      navigation.goBack();
+			// atualiza o post
+			await axios.patch(`${API_URL}/posts/${postId}`, {
+				title: postData.title,
+				description: postData.description,
+				cover: postData.cover,
+				grade: postData.grade,
+				nameLocation: postData.nameLocation,
+				location: postData.location
+			}, {
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
+	
+			// exibe mensagem de sucesso
+			Alert.alert('Sucesso', 'Post atualizado com sucesso');
+			navigation.goBack();
 
     } catch (error) {
       console.error('Erro ao atualizar post:', error);
@@ -89,22 +118,30 @@ const Post = ({ route, navigation }) => {
     }
   };
 
-  const handleDelete = async () => {
+	// função deletar post
+  const handleDeletePost = async () => {
+		// modal de confirmação de exclusão
     Alert.alert(
       'Confirmar exclusão',
       'Tem certeza que deseja excluir este post?',
+
       [
         { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
+        { text: 'Excluir', style: 'destructive',
+					// função para excluir post
           onPress: async () => {
             try {
+							// busca o token no AsyncStorage
               const token = await AsyncStorage.getItem('@auth_token');
+
+							// deleta o post
               await axios.delete(`${API_URL}/posts/${postId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
               });
+
+							// volta para a tela anterior
               navigation.goBack();
+
             } catch (error) {
               console.error('Erro ao excluir post:', error);
               Alert.alert('Erro', 'Não foi possível excluir o post');
@@ -115,7 +152,31 @@ const Post = ({ route, navigation }) => {
     );
   };
 
-  if (loading || !post) {
+	// Funções para atualizar partes específicas do estado
+	const updatePostData = (field, value) => {
+		setPostData(prev => ({ ...prev, [field]: value }));
+	};
+
+	// Exemplo de uso nas funções de atualização
+	const handleTitleSave = () => {
+		updatePostData('title', editableTitle);
+		setTitleModalVisible(false);
+	};
+
+	const handleDescriptionSave = () => {
+		updatePostData('description', editableDescription);
+		setDescriptionModalVisible(false);
+	};
+
+	const handleGradeUpdate = (newGrade) => {
+		updatePostData('grade', newGrade);
+	};
+
+	const toggleCover = (value) => {
+		updatePostData('cover', value);
+	};
+
+  if (loading || !postData) {
     return (
       <View style={styles.container}>
         <Text style={styles.loadingText}>Carregando...</Text>
@@ -129,30 +190,35 @@ const Post = ({ route, navigation }) => {
       <View style={styles.header}>
         <View style={styles.titleContainer}>
 					<TouchableOpacity onPress={() => setTitleModalVisible(true)}>
-						<TextInput
-							style={styles.titleInput}
-							value={title}
-							editable={false}
-							placeholder="Título do post"
-							placeholderTextColor="#B1AEAE"
-						/>
+
+					{/* título */}
+					<TextInput
+						style={styles.titleInput}
+						value={postData.title}
+						editable={false}
+						placeholder="Título do post"
+						placeholderTextColor="#B1AEAE"
+					/>
 					</TouchableOpacity>
-          <TouchableOpacity onPress={() => setModalVisible(true)}> 
+
+					{/* nota */}
+          <TouchableOpacity onPress={() => setRatingModalVisible(true)}> 
             <View style={styles.ratingContainer}>
-              <Text style={styles.grade}>{parseFloat(grade).toFixed(1)}</Text>
+              <Text style={styles.grade}>{parseFloat(postData.grade).toFixed(1)}</Text>
               <Feather name="star" size={24} color="#FFD700" />
             </View>
           </TouchableOpacity>
         </View>
         
-        {post.nameLocation ? (
-          <TouchableOpacity onPress={() => setLocationModalVisible(true)}>
+				{/* localização */}
+        {postData.nameLocation ? (
+					<TouchableOpacity onPress={() => setLocationModalVisible(true)}>
 						<View style={styles.locationContainer}>
 							<Feather name="map-pin" size={20} color="#FFFFFF" />
-							<Text style={styles.locationText}>{post.nameLocation}</Text>
+							<Text style={styles.locationText}>{postData.nameLocation}</Text>
 						</View>
 					</TouchableOpacity>
-        ) : (
+				) : (
           <TouchableOpacity 
             style={styles.addLocationButton}
             onPress={() => navigation.navigate('InputPhotoLocation', { postId })}
@@ -163,7 +229,7 @@ const Post = ({ route, navigation }) => {
         )}
       </View>
 
-			{/* Modal de confirmação de edição de localização */}
+			{/* modal de confirmação de edição de localização */}
       <Modal
         visible={isLocationModalVisible}
         transparent={true}
@@ -172,7 +238,8 @@ const Post = ({ route, navigation }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Editar localização?</Text>
+            <Text style={styles.modalTitle}>Editar a localização?</Text>
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.cancelButton}
@@ -180,6 +247,7 @@ const Post = ({ route, navigation }) => {
               >
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
+							
               <TouchableOpacity
                 style={styles.confirmButton}
                 onPress={() => {
@@ -196,41 +264,41 @@ const Post = ({ route, navigation }) => {
 
       {/* Imagem */}
       <Image
-        source={{ uri: post.imagem }}
+        source={{ uri: postData.imagem }}
         style={styles.postImage}
         resizeMode="cover"
       />
 
       {/* Descrição */}
       <TouchableOpacity onPress={() => setDescriptionModalVisible(true)}>
-        <TextInput
-          style={styles.descriptionInput}
-          value={description}
-          editable={false}
-          placeholder="Descrição do post"
-          placeholderTextColor="#B1AEAE"
-          multiline
-        />
+			<TextInput 
+				style={styles.descriptionInput}
+				value={postData.description}
+				editable={false}
+				placeholder="Descrição do post"
+				placeholderTextColor="#B1AEAE"
+				multiline
+			/>
       </TouchableOpacity>
 
       {/* Mapa */}
-      {post.location && (
+      {postData.location && (
         <>
           <Text style={styles.mapTitle}>No mapa</Text>
           <View style={styles.mapContainer}>
             <MapView
               style={styles.map}
               initialRegion={{
-                latitude: post.location.latitude,
-                longitude: post.location.longitude,
+                latitude: postData.location.latitude,
+                longitude: postData.location.longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
               }}
             >
               <Marker
                 coordinate={{
-                  latitude: post.location.latitude,
-                  longitude: post.location.longitude,
+                  latitude: postData.location.latitude,
+                  longitude: postData.location.longitude,
                 }}
               />
             </MapView>
@@ -242,7 +310,7 @@ const Post = ({ route, navigation }) => {
       <View style={styles.dateContainer}>
         <Feather name="map" size={20} color="#5EDFFF" />
         <Text style={styles.dateText}>
-          {format(new Date(post.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          {format(new Date(postData.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
         </Text>
       </View>
 
@@ -250,18 +318,19 @@ const Post = ({ route, navigation }) => {
       <View style={styles.coverContainer}>
         <Text style={styles.coverTitle}>Capa do Álbum</Text>
         <View style={styles.coverOptions}>
-          <TouchableOpacity 
-            style={[styles.coverOption, isCover && styles.coverOptionSelected]}
-            onPress={() => setIsCover(true)}
-          >
-            <Text style={styles.coverOptionText}>Sim</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.coverOption, !isCover && styles.coverOptionSelected]}
-            onPress={() => setIsCover(false)}
-          >
-            <Text style={styles.coverOptionText}>Não</Text>
-          </TouchableOpacity>
+				<TouchableOpacity 
+						style={[styles.coverOption, postData.cover && styles.coverOptionSelected]}
+						onPress={() => toggleCover(true)}
+					>
+						<Text style={styles.coverOptionText}>Sim</Text>
+					</TouchableOpacity>
+
+					<TouchableOpacity 
+						style={[styles.coverOption, !postData.cover && styles.coverOptionSelected]}
+						onPress={() => toggleCover(false)}
+					>
+						<Text style={styles.coverOptionText}>Não</Text>
+					</TouchableOpacity>
         </View>
       </View>
 
@@ -275,7 +344,7 @@ const Post = ({ route, navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.saveButton}
-          onPress={handleSave}
+          onPress={handleEditSave}
         >
           <Text style={styles.saveButtonText}>Salvar</Text>
         </TouchableOpacity>
@@ -284,44 +353,38 @@ const Post = ({ route, navigation }) => {
       {/* Botão Excluir */}
       <TouchableOpacity 
         style={styles.deleteButton}
-        onPress={handleDelete}
+        onPress={handleDeletePost}
       >
         <Text style={styles.deleteButtonText}>Excluir Post</Text>
       </TouchableOpacity>
 
 			{/* Rating Modal */}
       <RatingModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-        onSave={(newRating) => setGrade(newRating)}
-        initialRating={grade}
-      />
+				visible={isRatingModalVisible}
+				onClose={() => setRatingModalVisible(false)}
+				onSave={handleGradeUpdate}
+				initialRating={postData.grade}
+			/>
 
 			{/* Edit Title Modal */}
-      <EditModal
-        visible={isTitleModalVisible}
-        onClose={() => setTitleModalVisible(false)}
-        onSave={() => {
-          setTitle(editableTitle);
-          setTitleModalVisible(false);
-        }}
-        value={editableTitle}
-        setValue={setEditableTitle}
-        title="Editar título da foto?"
-      />
+      <EditPostModal
+				visible={isTitleModalVisible}
+				onClose={() => setTitleModalVisible(false)}
+				onSave={handleTitleSave}
+				value={editableTitle}
+				setValue={setEditableTitle}
+				title="Editar título da foto?"
+			/>
 
       {/* Edit Description Modal */}
-      <EditModal
-        visible={isDescriptionModalVisible}
-        onClose={() => setDescriptionModalVisible(false)}
-        onSave={() => {
-          setDescription(editableDescription);
-          setDescriptionModalVisible(false);
-        }}
-        value={editableDescription}
-        setValue={setEditableDescription}
-        title="Editar descrição da foto?"
-      />
+      <EditPostModal
+				visible={isDescriptionModalVisible}
+				onClose={() => setDescriptionModalVisible(false)}
+				onSave={handleDescriptionSave}
+				value={editableDescription}
+				setValue={setEditableDescription}
+				title="Editar descrição da foto?"
+			/>
     </ScrollView>
   );
 };

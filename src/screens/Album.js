@@ -134,7 +134,7 @@ const Album = ({ route }) => {
 			);
 			setPosts(updatedPosts);
 			
-			// Busca novamente os dados do álbum para obter o grade atualizado
+			// busca novamente os dados do álbum para obter o grade atualizado
 			const albumResponse = await axios.get(`${API_URL}/albums/${albumId}`, {
 				headers: {
 					'Authorization': `Bearer ${token}`
@@ -233,27 +233,34 @@ const Album = ({ route }) => {
 									styles.postItem,
 									index > 0 && styles.postItemWithMargin 
 								]}>
-                	{/* Imagem do post */}
-                	<Image 
-										source={{ uri: post.imagem }} 
-										style={styles.postImage}
-										resizeMode="cover"
-									/>
+                	{/* Imagem do post com TouchableOpacity */}
+                	<TouchableOpacity
+										onPress={() => navigation.navigate('Post', { 
+											postId: post._id,
+											albumId: albumId 
+										})}
+									>
+										<Image 
+											source={{ uri: post.imagem }} 
+											style={styles.postImage}
+											resizeMode="cover"
+										/>
+									</TouchableOpacity>
                 
                 {/* Informações do post */}
                 <View style={styles.postInfoContainer}>
-								<View style={styles.postHeader}>
-									<Text style={styles.postTitle}>{post.title}</Text>
-									<TouchableOpacity 
-										style={styles.postRating}
-										onPress={() => openRatingModal(post)}
-									>
-										<Text style={styles.postGrade}>
-											{post.grade ? `${post.grade}.0`.replace('.0.0', '.0') : '0.0'}
-										</Text>
-										<Feather name="star" size={24} color="#FFD700" />
-									</TouchableOpacity>
-								</View>
+									<View style={styles.postHeader}>
+										<Text style={styles.postTitle}>{post.title}</Text>
+										<TouchableOpacity 
+											style={styles.postRating}
+											onPress={() => openRatingModal(post)}
+										>
+											<Text style={styles.postGrade}>
+											{parseFloat(post.grade || 0.0).toFixed(1)}
+											</Text>
+											<Feather name="star" size={24} color="#FFD700" />
+										</TouchableOpacity>
+									</View>
                   <Text style={styles.postDescription}>{post.description}</Text>
                 </View>
                 

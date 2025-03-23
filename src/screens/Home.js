@@ -66,7 +66,6 @@ const Home = () => {
     },
   ];
 
-
 	// recupera os dados no AsyncStorage
 	useEffect(() => {
 		const getUserData = async () => {
@@ -343,7 +342,6 @@ const styles = StyleSheet.create({
 		marginBottom: 5,
 		overflow: 'hidden',
 		position: 'relative',
-		backgroundColor: 'red',
   },
   featuredImage: {
     width: '100%',

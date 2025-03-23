@@ -15,6 +15,7 @@ import UserProfile from '../screens/UserProfile';
 import Album from '../screens/Album';
 import NewPhoto from '../screens/NewPhoto';
 import InputPhotoLocation from '../screens/InputPhotoLocation';
+import Post from '../screens/Post';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -177,6 +178,11 @@ const AppNavigator = () => {
 				<Stack.Screen name="Album" component={Album} />
 				<Stack.Screen name="NewPhoto" component={NewPhoto} />
 				<Stack.Screen name="InputPhotoLocation" component={InputPhotoLocation} />
+				<Stack.Screen name="Post" component={Post}
+					options={{
+						headerShown: false
+					}}
+				/>
       </Stack.Navigator>
     </NavigationContainer>
   );

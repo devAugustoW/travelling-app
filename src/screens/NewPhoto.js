@@ -192,6 +192,23 @@ const NewPhoto = ({ route, navigation }) => {
 		navigation.navigate('InputPhotoLocation', { updatePhotoData });
 	};
 
+	// Função para simoplificar nameLocation
+	const simplifyLocationName = (fullLocation) => {
+		if (!fullLocation) return '';
+  
+  // substitui hífens por vírgulas para uniformizar o processamento
+  const normalizedLocation = fullLocation.replace(/ - /g, ', ');
+  
+  // divide por vírgulas
+  const parts = normalizedLocation.split(',');
+  
+  // se tiver menos de 2 partes, retorna o texto original
+  if (parts.length < 2) return fullLocation;
+  
+  // retorna apenas as duas primeiras partes
+  return `${parts[0].trim()}, ${parts[1].trim()}`;
+	};
+
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -236,9 +253,12 @@ const NewPhoto = ({ route, navigation }) => {
 						style={styles.locationButton}
 						onPress={navigateToInputPhotoLocation}
 					>
-						<Text style={styles.buttonText}>
-              {photoData.nameLocation || 'Selecionar Localização'}
-            </Text>
+						<Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">
+							{photoData.nameLocation 
+								? simplifyLocationName(photoData.nameLocation) 
+								: 'Selecionar Localização'
+							}
+						</Text>
 						<Feather name="chevron-right" size={18} color="#FFF" />
 					</TouchableOpacity>
 

@@ -176,6 +176,20 @@ const Post = ({ route, navigation }) => {
 		updatePostData('cover', value);
 	};
 
+  // Função para simplificar o nome da localização
+  const simplifyLocationName = (fullLocation) => {
+    if (!fullLocation) return '';
+    
+    // Dividir por vírgulas
+    const parts = fullLocation.split(',');
+    
+    // Se tiver menos de 2 partes, retorna o texto original
+    if (parts.length < 2) return fullLocation;
+    
+    // Retorna apenas as duas primeiras partes
+    return `${parts[0].trim()}, ${parts[1].trim()}`;
+  };
+
   if (loading || !postData) {
     return (
       <View style={styles.container}>
@@ -210,12 +224,14 @@ const Post = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
         
-				{/* localização */}
+				{/* localização - MODIFICADO */}
         {postData.nameLocation ? (
 					<TouchableOpacity onPress={() => setLocationModalVisible(true)}>
 						<View style={styles.locationContainer}>
 							<Feather name="map-pin" size={20} color="#FFFFFF" />
-							<Text style={styles.locationText}>{postData.nameLocation}</Text>
+							<Text style={styles.locationText}>
+								{simplifyLocationName(postData.nameLocation)}
+							</Text>
 						</View>
 					</TouchableOpacity>
 				) : (

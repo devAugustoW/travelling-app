@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, Polygon  } from 'react-native-maps';
 import axios from 'axios';
 import { API_URL } from '@env';
 
@@ -53,9 +53,13 @@ const Album = ({ route }) => {
         });
         setAlbum(albumResponse.data);
 
-        // atualiza estado de localização capturada
-        if (albumResponse.data.location) {
+        // atualiza estado de localização capturada - VERSÃO CORRIGIDA
+        if (albumResponse.data.location && 
+            (albumResponse.data.location.latitude !== 0 || 
+             albumResponse.data.location.longitude !== 0)) {
           setLocationCaptured(true);
+        } else {
+          setLocationCaptured(false);
         }
 				
         // buscar os posts do álbum
@@ -78,26 +82,21 @@ const Album = ({ route }) => {
   	}, [albumId, token])
 	);
 
-	// função para capturar a localização do álbum
+	// função para inserir a localização do álbum
 	const handleCheckIn = async () => {
-    try {
-			// solicitação de permissão
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permissão negada', 'Permissão para acessar localização foi negada.');
-        return;
-      }
-
-			// pega a localização atual
-      const location = await Location.getCurrentPositionAsync({});
-
-			// atualiza o estado de localização capturada
-      setLocationCaptured(true); 
-
-    } catch (error) {
-      console.log('Erro ao capturar localização:', error);
-      Alert.alert('Erro', 'Não foi possível capturar a localização.');
-    }
+    if (locationCaptured) {
+			// Se já tiver localização, exibe um alerta informando que a função ainda está em desenvolvimento
+			Alert.alert('Trip Map', 'Funcionalidade em desenvolvimento');
+		} else {
+			// Se não tiver localização, navega para o InputAlbumLocation
+			navigation.navigate('InputAlbumLocation', { 
+				albumId, 
+				onLocationSaved: () => {
+					// Atualiza o estado após salvar a localização
+					setLocationCaptured(true);
+				} 
+			});
+		}
   };
 
 	// Função para abrir o modal de avaliação
@@ -105,15 +104,6 @@ const Album = ({ route }) => {
 		setSelectedPost(post);
 		setModalVisible(true);
 	};
-
-  if (loading || !album) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.loadingText}>Carregando...</Text>
-      </SafeAreaView>
-    );
-  }
-
 
 	// Função para salvar a avaliação
 	const saveRating = async (rating) => {
@@ -146,6 +136,14 @@ const Album = ({ route }) => {
 			Alert.alert('Erro', 'Não foi possível salvar a avaliação');
 		}
 	};
+
+	if (loading || !album) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.loadingText}>Carregando...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -191,7 +189,7 @@ const Album = ({ route }) => {
 							<Feather name="trending-up" size={24} color="#5EDFFF" />
 						</View>
             <Text style={styles.infoTitle}>Dificuldade</Text>
-            <Text style={styles.infoText}>{album.difficulty || <Text>N/A</Text>}</Text>
+            <Text style={styles.infoText}>{album.difficulty || 'N/A'}</Text>
           </View>
 
           <View style={styles.infoItem}>
@@ -199,7 +197,7 @@ const Album = ({ route }) => {
       			<Feather name="clock" size={24} color="#5EDFFF" />
     			</View>
             <Text style={styles.infoTitle}>Tempo de Viagem</Text>
-            <Text style={styles.infoText}>{album.timeTravel || <Text>N/A</Text>}</Text>
+            <Text style={styles.infoText}>{album.timeTravel || 'N/A'}</Text>
           </View>
 
           <View style={styles.infoItem}>
@@ -207,7 +205,7 @@ const Album = ({ route }) => {
 						<Feather name="tag" size={24} color="#5EDFFF" />
 					</View>
             <Text style={styles.infoTitle}>Ticket</Text>
-            <Text style={styles.infoText}>{album.cost || <Text>N/A</Text>}</Text>
+            <Text style={styles.infoText}>{album.cost || 'N/A'}</Text>
           </View>
         </View>
 
@@ -282,11 +280,12 @@ const Album = ({ route }) => {
 						<View style={styles.mapWrapper}>
 							<MapView
 								style={styles.map}
+								scrollEnabled={false}
 								initialRegion={{
 									latitude: album.location.latitude,
 									longitude: album.location.longitude,
-									latitudeDelta: 0.10,
-									longitudeDelta: 0.10,
+									latitudeDelta: 0.25,
+									longitudeDelta: 0.25,
 								}}
 							>
 								<Marker
@@ -294,7 +293,8 @@ const Album = ({ route }) => {
 										latitude: album.location.latitude,
 										longitude: album.location.longitude,
 									}}
-								/>
+									pinColor="#5EDFFF"
+								/>								
 							</MapView>
 						</View>
 					</View>

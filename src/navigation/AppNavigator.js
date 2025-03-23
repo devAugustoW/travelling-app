@@ -15,6 +15,7 @@ import UserProfile from '../screens/UserProfile';
 import Album from '../screens/Album';
 import NewPhoto from '../screens/NewPhoto';
 import InputPhotoLocation from '../screens/InputPhotoLocation';
+import InputAlbumLocation from '../screens/inputAlbumLocation';
 import Post from '../screens/Post';
 
 const Stack = createNativeStackNavigator();
@@ -99,7 +100,7 @@ const TabNavigator = () => {
       />
 			<Tab.Screen 
         name="Camera" 
-        component={Home} // componente Home é simbólico
+        component={Home} 
         options={{
           tabBarIcon: ({ }) => (
             <Feather 
@@ -178,6 +179,7 @@ const AppNavigator = () => {
 				<Stack.Screen name="Album" component={Album} />
 				<Stack.Screen name="NewPhoto" component={NewPhoto} />
 				<Stack.Screen name="InputPhotoLocation" component={InputPhotoLocation} />
+				<Stack.Screen name="InputAlbumLocation" component={InputAlbumLocation} />
 				<Stack.Screen name="Post" component={Post}
 					options={{
 						headerShown: false

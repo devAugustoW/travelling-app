@@ -119,8 +119,8 @@ const Home = () => {
 				{/* Header */}
 				<View style={styles.header}>
 					<View>
-					<Text style={styles.greeting}>Olá {userData?.name || 'User'}</Text>
-						<Text style={styles.title}>Vamos viajar</Text>
+						<Text style={styles.greeting}>Olá {userData?.name || 'User'},</Text>
+						<Text style={styles.title}>Vamos viajar!</Text>
 					</View>
 					<Image
 						source={userData?.userImg
@@ -241,8 +241,8 @@ const styles = StyleSheet.create({
   title: {
     color: '#FFF',
     fontSize: 24,
+		lineHeight: 28,
     fontFamily: 'Poppins-Bold',
-		marginTop: '-55px'
   },
   profileImage: {
     width: 40,

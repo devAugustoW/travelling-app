@@ -22,7 +22,7 @@ import RatingModal from '../components/RatingModal';
 
 const Post = ({ route, navigation }) => {
   const { postId, albumId } = route.params;
-  
+
   const [postData, setPostData] = useState({
 		id: null,
 		title: '',
@@ -113,9 +113,9 @@ const Post = ({ route, navigation }) => {
 			navigation.goBack();
 
     } catch (error) {
-      console.error('Erro ao atualizar post:', error);
-      Alert.alert('Erro', 'Não foi possível atualizar o post');
-    }
+			console.error('Erro ao atualizar post:', error);			
+			Alert.alert('Erro',`Não foi possível atualizar o post: ${error}`);
+		}
   };
 
 	// função deletar post
@@ -152,12 +152,12 @@ const Post = ({ route, navigation }) => {
     );
   };
 
-	// Funções para atualizar partes específicas do estado
+	// Função para atualizar partes específicas do estado
 	const updatePostData = (field, value) => {
 		setPostData(prev => ({ ...prev, [field]: value }));
 	};
 
-	// Exemplo de uso nas funções de atualização
+	// Funções de atualização
 	const handleTitleSave = () => {
 		updatePostData('title', editableTitle);
 		setTitleModalVisible(false);

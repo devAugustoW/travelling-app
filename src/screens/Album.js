@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { 
   View, 
@@ -22,19 +22,20 @@ import RatingModal from '../components/RatingModal';
 
 const Album = ({ route }) => {
   const { albumId } = route.params;
+	const [token, setToken] = useState(null);
   const [album, setAlbum] = useState(null);
 	const [posts, setPosts] = useState([]);
-	const [token, setToken] = useState(null);
 	const [locationCaptured, setLocationCaptured] = useState(false);
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const navigation = useNavigation();
 
-  // Busca os dados do álbum e seus posts
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
+  // useFocusEffect -> busca os dados do álbum quando navega para tela
+  useFocusEffect(
+		React.useCallback(() => {
+			const fetchData = async () => {
+				try {
         setLoading(true);
         // pega o token do AsyncStorage
         const token = await AsyncStorage.getItem('@auth_token');
@@ -65,24 +66,17 @@ const Album = ({ route }) => {
         });
         setPosts(postsResponse.data);
 
-      } catch (error) {
-        console.log('Erro ao buscar dados:', error);
-        Alert.alert('Erro', 'Não foi possível carregar os dados do álbum e seus posts.');
-      } finally {
-        setLoading(false);
-      }
-    };
+				} catch (error) {
+					console.log('Erro ao buscar dados:', error);
+					Alert.alert('Erro', 'Não foi possível carregar os dados do álbum e seus posts.');
+				} finally {
+					setLoading(false);
+				}
+    	};
 
-    fetchData();
-  }, [albumId]);
-
-  if (loading || !album) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.loadingText}>Carregando...</Text>
-      </SafeAreaView>
-    );
-  }
+    	fetchData();
+  	}, [albumId, token])
+	);
 
 	// função para capturar a localização do álbum
 	const handleCheckIn = async () => {
@@ -112,6 +106,15 @@ const Album = ({ route }) => {
 		setModalVisible(true);
 	};
 
+  if (loading || !album) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.loadingText}>Carregando...</Text>
+      </SafeAreaView>
+    );
+  }
+
+
 	// Função para salvar a avaliação
 	const saveRating = async (rating) => {
 		try {
@@ -121,11 +124,7 @@ const Album = ({ route }) => {
 			await axios.patch(
 				`${API_URL}/posts/${selectedPost._id}/grade`, 
 				{ grade: rating },
-				{
-					headers: {
-						'Authorization': `Bearer ${token}`
-					}
-				}
+				{	headers: {'Authorization': `Bearer ${token}`}}
 			);
 			
 			// atualiza o estado local dos posts
@@ -136,9 +135,7 @@ const Album = ({ route }) => {
 			
 			// busca novamente os dados do álbum para obter o grade atualizado
 			const albumResponse = await axios.get(`${API_URL}/albums/${albumId}`, {
-				headers: {
-					'Authorization': `Bearer ${token}`
-				}
+				headers: {'Authorization': `Bearer ${token}`}
 			});
 			setAlbum(albumResponse.data);
 			

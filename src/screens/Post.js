@@ -247,12 +247,17 @@ const Post = ({ route, navigation }) => {
               >
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
-							
+
               <TouchableOpacity
                 style={styles.confirmButton}
                 onPress={() => {
                   setLocationModalVisible(false);
-                  navigation.navigate('InputPhotoLocation', { postId });
+
+									// passa o ID do post, função UpdatePhotoData e navega para InputPhotoLocation
+                  navigation.navigate('InputPhotoLocation', { 
+										postId,
+										updatePhotoData: (field, value) => updatePostData(field, value)
+									});
                 }}
               >
                 <Text style={styles.confirmButtonText}>Confirmar</Text>

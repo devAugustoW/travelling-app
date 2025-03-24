@@ -17,6 +17,7 @@ import NewPhoto from '../screens/NewPhoto';
 import InputPhotoLocation from '../screens/InputPhotoLocation';
 import InputAlbumLocation from '../screens/inputAlbumLocation';
 import Post from '../screens/Post';
+import TripMap from '../screens/TripMap';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -185,6 +186,7 @@ const AppNavigator = () => {
 						headerShown: false
 					}}
 				/>
+				<Stack.Screen name="TripMap" component={TripMap} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -321,6 +321,9 @@ const Post = ({ route, navigation }) => {
                   latitude: postData.location.latitude,
                   longitude: postData.location.longitude,
                 }}
+                pinColor="#5EDFFF"
+                title={postData.title}
+                description={simplifyLocationName(postData.nameLocation)}
               />
             </MapView>
           </View>

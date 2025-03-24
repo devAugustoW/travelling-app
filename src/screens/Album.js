@@ -85,18 +85,21 @@ const Album = ({ route }) => {
 	// função para inserir a localização do álbum
 	const handleCheckIn = async () => {
     if (locationCaptured) {
-			// Se já tiver localização, exibe um alerta informando que a função ainda está em desenvolvimento
-			Alert.alert('Trip Map', 'Funcionalidade em desenvolvimento');
-		} else {
-			// Se não tiver localização, navega para o InputAlbumLocation
-			navigation.navigate('InputAlbumLocation', { 
-				albumId, 
-				onLocationSaved: () => {
-					// Atualiza o estado após salvar a localização
-					setLocationCaptured(true);
-				} 
-			});
-		}
+      // Se já tiver localização, navega para o TripMap
+      navigation.navigate('TripMap', { 
+        albumId, 
+        albumTitle: album.title 
+      });
+    } else {
+      // Se não tiver localização, navega para o InputAlbumLocation
+      navigation.navigate('InputAlbumLocation', { 
+        albumId, 
+        onLocationSaved: () => {
+          // Atualiza o estado após salvar a localização
+          setLocationCaptured(true);
+        } 
+      });
+    }
   };
 
 	// Função para abrir o modal de avaliação

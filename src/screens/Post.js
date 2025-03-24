@@ -344,9 +344,9 @@ const Post = ({ route, navigation }) => {
 
       {/* Capa do Álbum */}
       <View style={styles.coverContainer}>
-        <Text style={styles.coverTitle}>Capa do Álbum</Text>
-        <View style={styles.coverOptions}>
-				<TouchableOpacity 
+				<Text style={styles.coverTitle}>Capa do Álbum</Text>
+				<View style={styles.coverOptions}>
+					<TouchableOpacity 
 						style={[styles.coverOption, postData.cover && styles.coverOptionSelected]}
 						onPress={() => toggleCover(true)}
 					>
@@ -359,8 +359,8 @@ const Post = ({ route, navigation }) => {
 					>
 						<Text style={styles.coverOptionText}>Não</Text>
 					</TouchableOpacity>
-        </View>
-      </View>
+				</View>
+			</View>
 
       {/* Botões */}
       <View style={styles.buttonContainer}>

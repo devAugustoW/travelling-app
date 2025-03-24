@@ -23,6 +23,7 @@ const Home = () => {
 	const [userData, setUserData] = useState(null);
 	const [activeFilter, setActiveFilter] = useState('1');
 	const [userAlbums, setUserAlbums] = useState([]);
+	const [bestPosts, setBestPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 	
 
@@ -66,7 +67,7 @@ const Home = () => {
     },
   ];
 
-	// recupera os dados no AsyncStorage
+	// Recupera os dados no AsyncStorage
 	useEffect(() => {
 		const getUserData = async () => {
 			try {
@@ -107,10 +108,39 @@ const Home = () => {
     }
   };
 
-	// Busca os dados quando o componente é montado
+	// Busca os dados dos albuns
 	useEffect(() => {
 		fetchUserAlbums();
 	}, []);
+
+	// Busca os melhores posts
+	useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('@auth_token');
+        
+        // Busca álbuns e melhores fotos em paralelo
+        const [albumsResponse, bestPostsResponse] = await Promise.all([
+          axios.get(`${API_URL}/user/albums`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          axios.get(`${API_URL}/posts/best`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+        ]);
+
+        setUserAlbums(albumsResponse.data.albums);
+        setBestPosts(bestPostsResponse.data.posts);
+        
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
 
 
   return (
@@ -166,24 +196,32 @@ const Home = () => {
 
 				{/* Melhores fotos */}
 				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Melhores Fotos</Text>
-					<FlatList  
-						horizontal
-						showsHorizontalScrollIndicator={false}
-						data={popularAlbums}
-						keyExtractor={(item) => item.id}
-						style={styles.albumList} 
-						renderItem={({ item }) => (
-							<TouchableOpacity key={item.id} style={styles.albumCard}>
-								<Image source={item.image} style={styles.albumImage} />
-								<View style={styles.albumInfo}>
-									<Text style={styles.albumTitle}>{item.title}</Text>
-									<Text style={styles.albumTime}>{item.time}</Text>
-								</View>
-							</TouchableOpacity>
-						)}
-					/>
-				</View>
+          <Text style={styles.sectionTitle}>Melhores Fotos</Text>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={bestPosts}
+            keyExtractor={(item) => item._id}
+            style={styles.albumList}
+            renderItem={({ item }) => (
+              <TouchableOpacity 
+                style={styles.albumCard}
+                onPress={() => navigation.navigate('Post', { postId: item._id })}
+              >
+                <Image 
+                  source={{ uri: item.imagem }} 
+                  style={styles.albumImage}
+                />
+                <View style={styles.albumInfo}>
+                  <Text style={styles.albumTitle}>{item.title}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={() => (
+              <Text style={styles.emptyText}>Nenhuma foto com nota máxima ainda</Text>
+            )}
+          />
+        </View>
 
 				{/* Destinos */}
 				<View style={styles.section}>
@@ -319,15 +357,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   albumInfo: {
-    padding: 10,
+    paddingHorizontal: 5,
+		paddingBottom: 5,
 		position: 'absolute',
 		bottom: 0,
 		left: 0,
   },
   albumTitle: {
     color: '#FFF',
-    fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
+    fontSize: 14,
   },
   albumTime: {
     color: '#ffffff',

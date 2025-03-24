@@ -192,21 +192,21 @@ const NewPhoto = ({ route, navigation }) => {
 		navigation.navigate('InputPhotoLocation', { updatePhotoData });
 	};
 
-	// Função para simoplificar nameLocation
+	// Função para simplificar nameLocation
 	const simplifyLocationName = (fullLocation) => {
 		if (!fullLocation) return '';
   
-  // substitui hífens por vírgulas para uniformizar o processamento
-  const normalizedLocation = fullLocation.replace(/ - /g, ', ');
+  	// substitui hífens por vírgulas para uniformizar o processamento
+  	const normalizedLocation = fullLocation.replace(/ - /g, ', ');
   
-  // divide por vírgulas
-  const parts = normalizedLocation.split(',');
+  	// divide por vírgulas
+  	const parts = normalizedLocation.split(',');
   
-  // se tiver menos de 2 partes, retorna o texto original
-  if (parts.length < 2) return fullLocation;
+  	// se tiver menos de 2 partes, retorna o texto original
+  	if (parts.length < 2) return fullLocation;
   
-  // retorna apenas as duas primeiras partes
-  return `${parts[0].trim()}, ${parts[1].trim()}`;
+  	// retorna apenas as duas primeiras partes
+  	return `${parts[0].trim()}, ${parts[1].trim()}`;
 	};
 
 

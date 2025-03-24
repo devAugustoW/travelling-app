@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
 		height: 150,
     marginBottom: 15,
     borderRadius: 8,
-		marginBottom: 5,
+		marginBottom: 20,
 		overflow: 'hidden',
 		position: 'relative',
   },

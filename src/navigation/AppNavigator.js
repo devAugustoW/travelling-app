@@ -1,11 +1,13 @@
 import React from 'react';
 import { useState } from 'react';
+import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
-import * as Camera from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
 import GetStart from '../screens/GetStart';
 import Register from '../screens/Register';
 import Login from '../screens/Login';
@@ -23,41 +25,51 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 
-// navegação bottom
+// Navegação bottom
 const TabNavigator = () => {
 	const [activeTab, setActiveTab] = useState('HomeTab');
 	const navigation = useNavigation();
 
-	// funcionalidade de camera
+	// Funcionalidade de camera atualizada
 	const openCamera = async () => {
-		const { status } = await Camera.requestCameraPermissionsAsync();
+		try {
+			// solicita permissão para a câmera
+			const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+			
+			// solicita permissão para acessar a galeria
+			const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
+			
+			if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
+				Alert.alert(
+					'Permissão necessária', 
+					'Precisamos de acesso à câmera e à galeria para tirar e salvar fotos'
+				);
+				return;
+			}
+			
+			// sbre a câmera 
+			const result = await ImagePicker.launchCameraAsync({
+				quality: 1,
+				allowsEditing: false,
+			});
+			
+			// se usuário tirou uma foto (não cancelou)
+			if (!result.canceled && result.assets && result.assets.length > 0) {
+				const photoUri = result.assets[0].uri;
+				
+				// salva a foto na galeria
+				const asset = await MediaLibrary.createAssetAsync(photoUri);
+				await MediaLibrary.createAlbumAsync('Travelling App', asset, false);
+				
+				// notifica o usuário que a foto foi salva
+				Alert.alert('Sucesso', 'Foto salva na galeria com sucesso!');
+			}
 
-		if (status === 'granted') {
-			// Abre a câmera nativa
-      await Camera.launchCameraAsync({
-        quality: 1,
-        allowsEditing: true,
-        aspect: [4, 3],
-      })
-      .then(result => {
-        if (!result.canceled) {
-          
-          console.log('Foto tirada:', result.assets[0].uri);
-          
-        }
-      })
-      .catch(error => {
-        console.log('Erro ao tirar foto:', error);
-        Alert.alert('Erro', 'Não foi possível tirar a foto');
-      });
-
-		}	else {
-      Alert.alert(
-        'Permissão necessária', 
-        'Precisamos de acesso à câmera para tirar fotos'
-      );
-    }
-	}
+		} catch (error) {
+			console.error('Erro ao tirar foto:', error);
+			Alert.alert('Erro', 'Não foi possível tirar ou salvar a foto');
+		}
+	};
 
 	return (
 		<Tab.Navigator

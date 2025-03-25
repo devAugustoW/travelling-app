@@ -19,7 +19,13 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_MEDIA_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,15 +35,25 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "O Travelling precisa da sua localização para criar o álbum.",
-          "locationAlwaysPermission": "O Travelling precisa da sua localização para criar o álbum.",
-          "locationWhenInUsePermission": "O Travelling precisa da sua localização para criar o álbum."
+          "locationAlwaysAndWhenInUsePermission": "Localização necessária para o mapa",
+          "locationAlwaysPermission": "Localização necessária para o mapa",
+          "locationWhenInUsePermission": "Localização necessária para o mapa"
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "Acesso para salvar fotos",
+          "cameraPermission": "Acesso à câmera para tirar fotos"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Acesso à galeria de fotos",
+          "savePhotosPermission": "Permissão para salvar fotos",
+          "isAccessMediaLocationEnabled": true,
+          "audioPermission": "Travelling não precisa de áudio"
         }
       ]
     ]

@@ -90,7 +90,7 @@ const Album = ({ route }) => {
   	}, [albumId, token])
 	);
 
-	// função para inserir a localização do álbum
+	// Função para inserir a localização do álbum
 	const handleCheckIn = async () => {
     if (locationCaptured) {
       // Se já tiver localização, navega para o TripMap
@@ -148,7 +148,7 @@ const Album = ({ route }) => {
 		}
 	};
 
-	// Nova função para salvar a edição do título
+	// Função para salvar a edição do título
   const handleTitleSave = async () => {
     try {
       if (!editableTitle.trim()) {
@@ -178,7 +178,7 @@ const Album = ({ route }) => {
     }
   };
 
-	// Nova função para salvar a edição da descrição
+	// Função para salvar a edição da descrição
 	const handleDescriptionSave = async () => {
 		try {
 			// atualiza a descrição do álbum na API
@@ -210,6 +210,66 @@ const Album = ({ route }) => {
 			setEditableDescription(album.description || '');
 		}
 	}, [album]);
+
+	// Função para deletar álbum com tratamento de erro simplificado
+	const handleDeleteAlbum = async () => {
+    // modal de confirmação de exclusão
+    Alert.alert(
+      'Confirmar exclusão',
+      'A exclusão do álbum irá excluir todas as fotos associadas a ele. Deseja prosseguir?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Excluir', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true); 
+              
+              // busca o token no AsyncStorage
+              const token = await AsyncStorage.getItem('@auth_token');
+              if (!token) {
+                Alert.alert('Erro', 'Você precisa estar logado');
+                return;
+              }
+              
+              // deleta o álbum
+              const response = await axios.delete(`${API_URL}/albums/${albumId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              
+              // exibe mensagem de sucesso
+              Alert.alert(
+                'Sucesso', 
+                `Álbum excluído com sucesso. ${response.data.details?.postsDeleted || 0} fotos foram removidas.`, 
+                [
+                  { 
+                    text: 'OK', 
+                    onPress: () => navigation.navigate('Home') 
+                  }
+                ]
+              );
+            } catch (error) {
+              // extrai informações sobre o erro
+              let errorMsg = 'Não foi possível excluir o álbum';
+              
+              if (error.response && error.response.data) {
+                if (error.response.data.message) {
+                  errorMsg = error.response.data.message;
+                } else if (error.response.data.error) {
+                  errorMsg = error.response.data.error;
+                }
+              }
+              
+              Alert.alert('Erro', errorMsg);
+            } finally {
+              setLoading(false); 
+            }
+          }
+        }
+      ]
+    );
+  };
 
 
 	if (loading || !album) {
@@ -396,6 +456,15 @@ const Album = ({ route }) => {
             <Text style={[styles.buttonText, styles.photoButtonText]}>Foto</Text>
           </TouchableOpacity>
         </View>
+
+				 {/* Botão Excluir Álbum */}
+				 <TouchableOpacity 
+          style={styles.deleteButton}
+          onPress={handleDeleteAlbum}
+        >
+          <Text style={styles.deleteButtonText}>Excluir Álbum</Text>
+        </TouchableOpacity>
+
       </ScrollView>
 
 			{/* componente RatingModal */}
@@ -703,6 +772,20 @@ const styles = StyleSheet.create({
     color: '#031F2B',
     textAlign: 'center',
     marginLeft: 0,
+  },
+	deleteButton: {
+    backgroundColor: '#FF4444',
+    borderRadius: 8,
+    padding: 15,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
+    textAlign: 'center',
   },
 	modalOverlay: {
     flex: 1,

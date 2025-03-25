@@ -10,7 +10,9 @@ import {
   ScrollView, 
   TouchableOpacity,
   Image,
-  Alert
+  Alert,
+	Modal,
+  TextInput
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -30,6 +32,12 @@ const Album = ({ route }) => {
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const navigation = useNavigation();
+
+	const [titleModalVisible, setTitleModalVisible] = useState(false);
+  const [editableTitle, setEditableTitle] = useState('');
+	const [descriptionModalVisible, setDescriptionModalVisible] = useState(false);
+  const [editableDescription, setEditableDescription] = useState('');
+	
 
   // useFocusEffect -> busca os dados do álbum quando navega para tela
   useFocusEffect(
@@ -140,6 +148,70 @@ const Album = ({ route }) => {
 		}
 	};
 
+	// Nova função para salvar a edição do título
+  const handleTitleSave = async () => {
+    try {
+      if (!editableTitle.trim()) {
+        Alert.alert('Erro', 'O título não pode estar vazio');
+        return;
+      }
+
+      // Atualiza o título do álbum na API
+      await axios.patch(
+        `${API_URL}/albums/${albumId}/title`,
+        { title: editableTitle },
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      // Atualiza o estado local
+      setAlbum(prev => ({ ...prev, title: editableTitle }));
+      
+      // Fecha o modal
+      setTitleModalVisible(false);
+      
+      // Exibe mensagem de sucesso
+      Alert.alert('Sucesso', 'Título do álbum atualizado com sucesso');
+      
+    } catch (error) {
+      console.error('Erro ao atualizar título:', error);
+      Alert.alert('Erro', 'Não foi possível atualizar o título do álbum');
+    }
+  };
+
+	// Nova função para salvar a edição da descrição
+	const handleDescriptionSave = async () => {
+		try {
+			// atualiza a descrição do álbum na API
+			await axios.patch(
+				`${API_URL}/albums/${albumId}/description`,
+				{ description: editableDescription },
+				{ headers: { 'Authorization': `Bearer ${token}` } }
+			);
+
+			// atualiza o estado local
+			setAlbum(prev => ({ ...prev, description: editableDescription }));
+			
+			// fecha o modal
+			setDescriptionModalVisible(false);
+			
+			// exibe mensagem de sucesso
+			Alert.alert('Sucesso', 'Descrição do álbum atualizada com sucesso');
+			
+		} catch (error) {
+			console.error('Erro ao atualizar descrição:', error);
+			Alert.alert('Erro', 'Não foi possível atualizar a descrição do álbum');
+		}
+	};
+
+	// Atualiza os campos editáveis quando o álbum é carregado
+	useEffect(() => {
+		if (album) {
+			setEditableTitle(album.title);
+			setEditableDescription(album.description || '');
+		}
+	}, [album]);
+
+
 	if (loading || !album) {
     return (
       <SafeAreaView style={styles.container}>
@@ -171,7 +243,9 @@ const Album = ({ route }) => {
 						/>
 					)}
 					<View style={styles.coverOverlay}>
-						<Text style={styles.albumTitle}>{album.title}</Text>
+						<TouchableOpacity onPress={() => setTitleModalVisible(true)}>
+              <Text style={styles.albumTitle}>{album.title}</Text>
+            </TouchableOpacity>
 						<View style={styles.ratingContainer}>
 								<Text style={styles.albumGrade}>
 								{album.grade 
@@ -218,7 +292,9 @@ const Album = ({ route }) => {
         {/* Sobre */}
         <View style={styles.aboutContainer}>
           <Text style={styles.sectionTitle}>Sobre</Text>
-          <Text style={styles.description}>{album.description || 'Sem descrição'}</Text>
+					<TouchableOpacity onPress={() => setDescriptionModalVisible(true)}>
+            <Text style={styles.description}>{album.description}</Text>
+          </TouchableOpacity>
         </View>
 
 				{/* Posts do álbum */}
@@ -329,6 +405,92 @@ const Album = ({ route }) => {
         onSave={saveRating}
         initialRating={selectedPost?.grade || 0}
       />
+
+			{/* Modal para edição do título */}
+			<Modal
+        visible={titleModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setTitleModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Editar título do álbum</Text>
+            
+            <TextInput
+              style={styles.modalInput}
+              value={editableTitle}
+              onChangeText={setEditableTitle}
+              placeholder="Digite o novo título"
+              placeholderTextColor="#666"
+              autoFocus
+            />
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => {
+                  setEditableTitle(album.title); // Reset para o valor original
+                  setTitleModalVisible(false);
+                }}
+              >
+                <Text style={styles.modalCancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.modalSaveButton}
+                onPress={handleTitleSave}
+              >
+                <Text style={styles.modalSaveButtonText}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+			{/* Novo Modal para edição da descrição */}
+      <Modal
+        visible={descriptionModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setDescriptionModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Editar descrição do álbum</Text>
+            
+            <TextInput
+              style={[styles.modalInput, styles.modalTextArea]}
+              value={editableDescription}
+              onChangeText={setEditableDescription}
+              placeholder="Digite a descrição do álbum"
+              placeholderTextColor="#666"
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => {
+                  setEditableDescription(album.description || ''); // Reset para o valor original
+                  setDescriptionModalVisible(false);
+                }}
+              >
+                <Text style={styles.modalCancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.modalSaveButton}
+                onPress={handleDescriptionSave}
+              >
+                <Text style={styles.modalSaveButtonText}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -376,6 +538,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 20,
     fontFamily: 'Poppins-Medium',
+		paddingVertical: 5,
   },
   albumGrade: {
     color: '#FFF',
@@ -433,6 +596,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins-Regular',
     lineHeight: 20,
+		paddingVertical: 5,
   },
 	postsContainer: {
     padding: 20,
@@ -539,6 +703,74 @@ const styles = StyleSheet.create({
     color: '#031F2B',
     textAlign: 'center',
     marginLeft: 0,
+  },
+	modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '90%',
+    backgroundColor: '#031F2B',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    color: '#FFF',
+    fontSize: 18,
+    fontFamily: 'Poppins-Medium',
+    marginBottom: 15,
+  },
+  modalInput: {
+    width: '100%',
+    borderBottomWidth: 1,
+		borderBottomColor: '#5EDFFF',
+    color: '#FFF',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+    fontFamily: 'Poppins-Regular',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  modalCancelButton: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#263238',
+    borderRadius: 8,
+    marginRight: 5,
+    alignItems: 'center',
+  },
+  modalCancelButtonText: {
+    color: '#5EDFFF',
+    fontSize: 14,
+    fontFamily: 'Poppins-Medium',
+  },
+  modalSaveButton: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: '#5EDFFF',
+    borderRadius: 8,
+    marginLeft: 5,
+    alignItems: 'center',
+  },
+  modalSaveButtonText: {
+    color: '#031F2B',
+    fontSize: 14,
+    fontFamily: 'Poppins-Medium',
+  },
+	modalTextArea: {
+    height: 120,
+    textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: '#5EDFFF',
+    borderRadius: 8,
+    backgroundColor: '#0A2834',
   },
 });
 

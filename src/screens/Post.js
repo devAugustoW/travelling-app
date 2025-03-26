@@ -221,7 +221,9 @@ const Post = ({ route, navigation }) => {
 					{/* nota */}
           <TouchableOpacity onPress={() => setRatingModalVisible(true)}> 
             <View style={styles.ratingContainer}>
-              <Text style={styles.grade}>{parseFloat(postData.grade).toFixed(1)}</Text>
+              <Text style={styles.grade}>
+								{postData?.grade ? parseFloat(postData.grade).toFixed(1) : "0.0"}
+							</Text>
               <Feather name="star" size={24} color="#FFD700" />
             </View>
           </TouchableOpacity>
@@ -306,7 +308,7 @@ const Post = ({ route, navigation }) => {
       </TouchableOpacity>
 
       {/* Mapa */}
-      {postData.location && (
+      {postData.location && postData.location.latitude && postData.location.longitude && (
         <>
           <Text style={styles.mapTitle}>No mapa</Text>
           <View style={styles.mapContainer}>
@@ -326,8 +328,7 @@ const Post = ({ route, navigation }) => {
                   longitude: postData.location.longitude,
                 }}
                 pinColor="#5EDFFF"
-                title={postData.title}
-                description={simplifyLocationName(postData.nameLocation)}
+                description={postData.nameLocation ? simplifyLocationName(postData.nameLocation) : ""}
               />
             </MapView>
           </View>
@@ -338,7 +339,9 @@ const Post = ({ route, navigation }) => {
       <View style={styles.dateContainer}>
         <Feather name="map" size={20} color="#5EDFFF" />
         <Text style={styles.dateText}>
-          {format(new Date(postData.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          {postData.createdAt ? 
+            format(new Date(postData.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : 
+            "Data não disponível"}
         </Text>
       </View>
 
@@ -474,6 +477,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		marginTop: 10,
+		marginBottom: 10,
 	},
 	addLocationText: {
 		color: '#5EDFFF',

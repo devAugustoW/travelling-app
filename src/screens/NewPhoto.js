@@ -7,7 +7,7 @@ import axios from 'axios';
 import { API_URL, CLOUD_UPLOAD_PRESET, CLOUD_NAME } from '@env';
 
 const NewPhoto = ({ route, navigation }) => {
-	const { albumId } = route.params || {};
+	const { albumId, photoUri } = route.params || {};
 	const [isLoading, setIsLoading] = useState(false);
 	const [userId, setUserId] = useState(null);
 	const [token, setToken] = useState(null);
@@ -24,30 +24,38 @@ const NewPhoto = ({ route, navigation }) => {
 		albumId: albumId,
 	});
 
-	  // Recupera o ID do usuário do AsyncStorage
-		useEffect(() => {
-			const fetchUserId = async () => {
-				try {
-					// Buscar dados do usuário
-					const userDataString = await AsyncStorage.getItem('@user_data');
-					if (userDataString) {
-						const userData = JSON.parse(userDataString);
-						setUserId(userData._id); 
-					}
-
-					// Buscar token de autenticação
-					const authToken = await AsyncStorage.getItem('@auth_token');
-					if (authToken) {
-						setToken(authToken);
-					}
-
-				} catch (error) {
-					console.log('Erro ao buscar ID do usuário:', error);
+	// Recupera o ID do usuário do AsyncStorage
+	useEffect(() => {
+		const fetchUserId = async () => {
+			try {
+				// Buscar dados do usuário
+				const userDataString = await AsyncStorage.getItem('@user_data');
+				if (userDataString) {
+					const userData = JSON.parse(userDataString);
+					setUserId(userData._id); 
 				}
-			};
-	
-			fetchUserId();
-		}, []);
+
+				// Buscar token de autenticação
+				const authToken = await AsyncStorage.getItem('@auth_token');
+				if (authToken) {
+					setToken(authToken);
+				}
+
+			} catch (error) {
+				console.log('Erro ao buscar ID do usuário:', error);
+			}
+		};
+
+		fetchUserId();
+	}, []);
+
+	  // Atualizar o estado com a imagem recebida quando o componente montar
+		useEffect(() => {
+			if (photoUri) {
+				updatePhotoData('image', photoUri);
+			}
+		}, [photoUri, updatePhotoData]);
+
 
 	// Função para atualizar campos específicos
 	const updatePhotoData = useCallback((field, value) => {
@@ -108,7 +116,7 @@ const NewPhoto = ({ route, navigation }) => {
 	const handleSavePhoto = async () => {
 		setIsLoading(true);
 		try {
-			// Validação básica
+			// validação
 			if (!photoData.image) {
 				Alert.alert('Erro', 'Selecione uma imagem');
 				return;
@@ -118,11 +126,11 @@ const NewPhoto = ({ route, navigation }) => {
 				return;
 			}
 
-			// Cloudinary -> Upload e extrair
+			// Cloudinary -> Upload e extrai URL
 			const cloudinaryResponse = await uploadImageToCloudinary(photoData.image);
 			const imageUrl = cloudinaryResponse.secure_url;
 
-			// Preparar os dados para envio
+			// prepara os dados para envio
       const postData = {
         imagem: imageUrl,
         title: photoData.title,
@@ -138,7 +146,7 @@ const NewPhoto = ({ route, navigation }) => {
         albumId: photoData.albumId,
       };
 
-			// Enviar para a API com o token de autenticação
+			// envia para a API com o token de autenticação
 			const response = await axios.post(
 				`${API_URL}/posts`, 
 				postData,
@@ -149,7 +157,7 @@ const NewPhoto = ({ route, navigation }) => {
 				}
 			);
 
-			// Mensagem de sucesso, limpar campos e navegar para Album
+			// mensagem de sucesso, limpar campos e navegar para Album
 			Alert.alert(
 				'Sucesso',
 				'Foto salva com sucesso!',
@@ -157,7 +165,7 @@ const NewPhoto = ({ route, navigation }) => {
 					{
 						text: 'OK',
 						onPress: () => {
-							// Limpar os campos do formulário
+							// limpa os campos do formulário
 							setPhotoData({
 								image: null,
 								title: '',
@@ -171,7 +179,7 @@ const NewPhoto = ({ route, navigation }) => {
 								albumId: albumId,
 							});
 							
-							// Navegar de volta para a tela do álbum
+							// navega de volta para a tela do álbum
 							navigation.navigate('Album', { albumId: photoData.albumId });
 						}
 					}

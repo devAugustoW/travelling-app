@@ -6,6 +6,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_URL } from '@env';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import GetStart from '../screens/GetStart';
@@ -25,6 +28,31 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 
+// Função para buscar o último álbum criado pelo usuário
+const getLastAlbumId = async () => {
+  try {
+    // busca token de autenticação
+    const token = await AsyncStorage.getItem('@auth_token');
+    if (!token) return null;
+
+    // requisição para buscar os álbuns do usuário
+    const response = await axios.get(`${API_URL}/user/albums`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    // verifica se há álbuns e ordena pelo mais recente
+    if (response.data && response.data.albums && response.data.albums.length > 0) {
+      return response.data.albums[0]._id;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Erro ao buscar o último álbum:', error);
+    return null;
+  }
+};
+
+
 // Navegação bottom
 const TabNavigator = () => {
 	const [activeTab, setActiveTab] = useState('HomeTab');
@@ -33,10 +61,8 @@ const TabNavigator = () => {
 	// Funcionalidade de camera atualizada
 	const openCamera = async () => {
 		try {
-			// solicita permissão para a câmera
+			// solicita permissões
 			const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
-			
-			// solicita permissão para acessar a galeria
 			const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
 			
 			if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
@@ -57,14 +83,39 @@ const TabNavigator = () => {
 			if (!result.canceled && result.assets && result.assets.length > 0) {
 				const photoUri = result.assets[0].uri;
 				
-				// salva a foto na galeria
-				const asset = await MediaLibrary.createAssetAsync(photoUri);
-				await MediaLibrary.createAlbumAsync('Travelling App', asset, false);
-				
-				// notifica o usuário que a foto foi salva
-				Alert.alert('Sucesso', 'Foto salva na galeria com sucesso!');
+				// busca o último álbum criado
+				const lastAlbumId = await getLastAlbumId();
+      
+				if (lastAlbumId) {
+					// navega para NewPhoto com a URI da foto e ID do álbum
+					navigation.navigate('NewPhoto', { 
+						photoUri: photoUri,
+						albumId: lastAlbumId 
+					});			
+				} else {
+					// se não houver álbum, perguntar se quer criar um novo
+					Alert.alert(
+						'Nenhum álbum encontrado',
+						'Você deseja criar um novo álbum para esta foto?',
+						[
+							{
+								text: 'Não',
+								style: 'cancel',
+								onPress: async () => {
+									// salva foto na galeria 
+									const asset = await MediaLibrary.createAssetAsync(photoUri);
+									await MediaLibrary.createAlbumAsync('Travelling App', asset, false);
+									Alert.alert('Sucesso', 'Foto salva na galeria com sucesso!');
+								}
+							},
+							{
+								text: 'Sim',
+								onPress: () => navigation.navigate('CreateAlbum')
+							}
+						]
+					);
+				}
 			}
-
 		} catch (error) {
 			console.error('Erro ao tirar foto:', error);
 			Alert.alert('Erro', 'Não foi possível tirar ou salvar a foto');

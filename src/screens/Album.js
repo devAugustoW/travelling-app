@@ -288,9 +288,9 @@ const Album = ({ route }) => {
 			>
         {/* Seção da capa */}
 				<View style={{ position: 'relative' }}>
-					{album.cover ? (
+					{album.cover && posts.length > 0 && posts.find(post => post.cover === true)?.imagem ? (
 						<Image 
-							source={{ uri: posts.find(post => post.cover === true).imagem }}  
+							source={{ uri: posts.find(post => post.cover === true)?.imagem }}  
 							style={styles.coverImage}
 							resizeMode="cover"
 						/>
@@ -354,7 +354,7 @@ const Album = ({ route }) => {
         <View style={styles.aboutContainer}>
           <Text style={styles.sectionTitle}>Sobre</Text>
 					<TouchableOpacity onPress={() => setDescriptionModalVisible(true)}>
-            <Text style={styles.description}>{album.description}</Text>
+            <Text style={styles.description}>{album.description || ''}</Text>
           </TouchableOpacity>
         </View>
 
@@ -366,7 +366,7 @@ const Album = ({ route }) => {
 								key={post._id || index} 
 								style={[
 									styles.postItem,
-									index > 0 && styles.postItemWithMargin 
+									index > 0 ? styles.postItemWithMargin : null
 								]}>
                 	{/* Imagem do post com TouchableOpacity */}
                 	<TouchableOpacity
@@ -414,7 +414,7 @@ const Album = ({ route }) => {
         <View style={styles.separator} />
 
         {/* Mapa */}
-        {album.location && album.location.latitude && album.location.longitude && (
+				{album.location && album.location.latitude && album.location.longitude ? (
 					<View style={styles.mapContainer}>
 						<Text style={styles.sectionTitle}>No mapa</Text>
 						<View style={styles.mapWrapper}>
@@ -434,11 +434,11 @@ const Album = ({ route }) => {
 										longitude: album.location.longitude,
 									}}
 									pinColor="#5EDFFF"
-								/>								
+								/>
 							</MapView>
 						</View>
 					</View>
-				)}
+				) : null}
 
         {/* Botões */}
         <View style={styles.buttonContainer}>
@@ -468,7 +468,7 @@ const Album = ({ route }) => {
 
       </ScrollView>
 
-			{/* componente RatingModal */}
+			{/* Componente RatingModal */}
 			<RatingModal 
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -500,7 +500,7 @@ const Album = ({ route }) => {
               <TouchableOpacity
                 style={styles.modalCancelButton}
                 onPress={() => {
-                  setEditableTitle(album.title); // Reset para o valor original
+                  setEditableTitle(album.title); 
                   setTitleModalVisible(false);
                 }}
               >
@@ -518,7 +518,7 @@ const Album = ({ route }) => {
         </View>
       </Modal>
 
-			{/* Novo Modal para edição da descrição */}
+			{/* Modal para edição da descrição */}
       <Modal
         visible={descriptionModalVisible}
         transparent={true}
@@ -544,7 +544,7 @@ const Album = ({ route }) => {
               <TouchableOpacity
                 style={styles.modalCancelButton}
                 onPress={() => {
-                  setEditableDescription(album.description || ''); // Reset para o valor original
+                  setEditableDescription(album.description || ''); 
                   setDescriptionModalVisible(false);
                 }}
               >

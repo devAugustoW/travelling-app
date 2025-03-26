@@ -306,13 +306,14 @@ const Album = ({ route }) => {
 						<TouchableOpacity onPress={() => setTitleModalVisible(true)}>
               <Text style={styles.albumTitle}>{album.title}</Text>
             </TouchableOpacity>
+
 						<View style={styles.ratingContainer}>
 								<Text style={styles.albumGrade}>
-								{album.grade 
-									? Number.isInteger(album.grade) 
-										? `${album.grade}.0` 
-										: album.grade.toFixed(1) 
-									: '0.0'}
+									{album.grade 
+										? Number.isInteger(album.grade) 
+											? `${album.grade}.0` 
+											: album.grade.toFixed(1) 
+										: '0.0'}
 								</Text>
 							<Feather name="star" size={24} color="#FFD700" />
 						</View>
@@ -447,7 +448,7 @@ const Album = ({ route }) => {
           >
             <Feather name="map" size={20} color="#5EDFFF" />
             <Text style={styles.buttonText}>
-              {locationCaptured ? 'Trip Map' : 'Check In'} 
+							{locationCaptured ? 'Trip Map' : 'Check In'}
             </Text>
           </TouchableOpacity>
 
@@ -491,7 +492,7 @@ const Album = ({ route }) => {
               value={editableTitle}
               onChangeText={setEditableTitle}
               placeholder="Digite o novo título"
-              placeholderTextColor="#666"
+              placeholderTextColor="#667"
               autoFocus
             />
             
@@ -597,13 +598,14 @@ const styles = StyleSheet.create({
     left: 10,
     right: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+		justifyContent: 'space-between',
     alignItems: 'center',
 		paddingBottom: 10,
     borderRadius: 8,
 		zIndex: 100,
 	},
 	albumTitle: {
+		width: '85%',
     color: '#FFF',
     fontSize: 20,
     fontFamily: 'Poppins-Medium',
@@ -617,6 +619,8 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
 		columnGap: 5,
+		position: 'absolute', 
+		right: 0,
   },
   infoContainer: {
     flexDirection: 'row',

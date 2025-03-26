@@ -4,7 +4,7 @@ import { API_URL } from '@env';
 import { useState, useEffect } from 'react';
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
@@ -113,34 +113,37 @@ const Home = () => {
 		fetchUserAlbums();
 	}, []);
 
-	// Busca os melhores posts
-	useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const token = await AsyncStorage.getItem('@auth_token');
-        
-        // Busca álbuns e melhores fotos em paralelo
-        const [albumsResponse, bestPostsResponse] = await Promise.all([
-          axios.get(`${API_URL}/user/albums`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          }),
-          axios.get(`${API_URL}/posts/best`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          })
-        ]);
+	// useFocusEffect para buscar melhores fotos
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchInitialData = async () => {
+        try {
+          setLoading(true);
+          const token = await AsyncStorage.getItem('@auth_token');
+          
+          // busca álbuns e melhores fotos
+          const [albumsResponse, bestPostsResponse] = await Promise.all([
+            axios.get(`${API_URL}/user/albums`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            }),
+            axios.get(`${API_URL}/posts/best`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            })
+          ]);
 
-        setUserAlbums(albumsResponse.data.albums);
-        setBestPosts(bestPostsResponse.data.posts);
-        
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+          setUserAlbums(albumsResponse.data.albums);
+          setBestPosts(bestPostsResponse.data.posts);
+          
+        } catch (error) {
+          console.error('Erro ao carregar dados:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    fetchInitialData();
-  }, []);
+      fetchInitialData();
+    }, []) 
+  );
 
 
   return (

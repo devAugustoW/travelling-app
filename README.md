@@ -51,3 +51,6 @@ Este repositório contém o código frontend do travellingApp. Para uma experiê
 ### Backend (API)
 
 [Link para o repositório da API](https://github.com/devAugustoW/travelling-api)
+
+✒️ Autor
+Augusto Dantas - @devaugustow

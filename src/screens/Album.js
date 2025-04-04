@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import * as Location from 'expo-location';
 import { 
   View, 
   Text, 
@@ -12,7 +11,8 @@ import {
   Image,
   Alert,
 	Modal,
-  TextInput
+  TextInput,
+	useWindowDimensions
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
@@ -31,6 +31,8 @@ const Album = ({ route }) => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [postImageSizes, setPostImageSizes] = useState({});
+  const windowWidth = useWindowDimensions().width;
 	const navigation = useNavigation();
 
 	const [titleModalVisible, setTitleModalVisible] = useState(false);
@@ -39,7 +41,7 @@ const Album = ({ route }) => {
   const [editableDescription, setEditableDescription] = useState('');
 	
 
-  // useFocusEffect -> busca os dados do álbum quando navega para tela
+  // useFocusEffect -> remonta o componente ao voltar na tela
   useFocusEffect(
 		React.useCallback(() => {
 			const fetchData = async () => {
@@ -89,6 +91,38 @@ const Album = ({ route }) => {
     	fetchData();
   	}, [albumId, token])
 	);
+
+	// Função para calcular dimensões de imagens
+  const calculateImageDimensions = useCallback((imageUri, postId) => {
+    Image.getSize(imageUri, (width, height) => {
+      // altura proporcional com base na largura 
+      const screenWidth = windowWidth - 40; // padding 
+      const scaleFactor = screenWidth / width;
+      const calculatedHeight = height * scaleFactor;
+      
+      // mínimo e máximo para a altura
+      const finalHeight = Math.min(Math.max(calculatedHeight, 200), 500);
+      
+      setPostImageSizes(prev => ({
+        ...prev,
+        [postId]: {
+          width: screenWidth,
+          height: finalHeight
+        }
+      }));
+    }, error => console.log('Erro ao obter tamanho da imagem:', error));
+  }, [windowWidth]);
+
+	// Calcular dimensões das imagens quando os posts forem carregados
+  useEffect(() => {
+    if (posts && posts.length > 0) {
+      posts.forEach(post => {
+        if (post.imagem && post._id) {
+          calculateImageDimensions(post.imagem, post._id);
+        }
+      });
+    }
+  }, [posts, calculateImageDimensions]);
 
 	// Função para inserir a localização do álbum
 	const handleCheckIn = async () => {
@@ -377,8 +411,13 @@ const Album = ({ route }) => {
 									>
 										<Image 
 											source={{ uri: post.imagem }} 
-											style={styles.postImage}
-											resizeMode="cover"
+											style={[
+												styles.postImage,
+												postImageSizes[post._id] ? 
+													{ height: postImageSizes[post._id].height } : 
+													{ height: 450 }
+											]}
+											resizeMode="contain"
 										/>
 									</TouchableOpacity>
                 
@@ -682,8 +721,7 @@ const styles = StyleSheet.create({
 		marginTop:20,
 	},
   postImage: {
-    width: 'auto',
-    height: 450,
+    width: '100%',
     borderRadius: 10,
     marginBottom: 15,
   },

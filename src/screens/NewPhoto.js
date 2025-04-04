@@ -62,12 +62,12 @@ const NewPhoto = ({ route, navigation }) => {
 	useEffect(() => {
 		if (photoData.image) {
 			Image.getSize(photoData.image, (width, height) => {
-				// Calcule a altura proporcional com base na largura da tela
-				const screenWidth = windowWidth - 20; // Ajuste para padding
+				// altura proporcional com base na largura da tela
+				const screenWidth = windowWidth - 20; // padding
 				const scaleFactor = screenWidth / width;
 				const calculatedHeight = height * scaleFactor;
 				
-				// Defina um mínimo e máximo para a altura
+				// mínimo e máximo para altura
 				const finalHeight = Math.min(Math.max(calculatedHeight, 200), 500);
 				
 				setImageSize({

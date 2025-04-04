@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-	Modal
+	Modal,
+	useWindowDimensions
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
@@ -22,6 +23,8 @@ import RatingModal from '../components/RatingModal';
 
 const Post = ({ route, navigation }) => {
   const { postId, albumId } = route.params;
+	const windowWidth = useWindowDimensions().width;
+	const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
   const [postData, setPostData] = useState({
 		id: null,
@@ -35,23 +38,43 @@ const Post = ({ route, navigation }) => {
 		createdAt: null
 	});
   
-  // Estados de edição
-  const [editableTitle, setEditableTitle] = useState('');
-  const [editableDescription, setEditableDescription] = useState('');
-  
   // Estados de visibilidade de modais
   const [isTitleModalVisible, setTitleModalVisible] = useState(false);
   const [isDescriptionModalVisible, setDescriptionModalVisible] = useState(false);
   const [isRatingModalVisible, setRatingModalVisible] = useState(false);
   const [isLocationModalVisible, setLocationModalVisible] = useState(false);
+
+	 // Estados de edição
+	 const [editableTitle, setEditableTitle] = useState('');
+	 const [editableDescription, setEditableDescription] = useState('');
   
   // Estado de carregamento
   const [loading, setLoading] = useState(true);
 
-	// careega os dados do Post
+	// carrega os dados do Post
   useEffect(() => {
     fetchPost();
   }, []);
+
+	// calcula dimensões da imagem
+  useEffect(() => {
+    if (postData.imagem) {
+      Image.getSize(postData.imagem, (width, height) => {
+        // altura proporcional com base na largura disponível
+        const screenWidth = windowWidth - 20; // padding
+        const scaleFactor = screenWidth / width;
+        const calculatedHeight = height * scaleFactor;
+        
+        // mínimo e máximo para a altura
+        const finalHeight = Math.min(Math.max(calculatedHeight, 350), 700);
+        
+        setImageSize({
+          width: screenWidth,
+          height: finalHeight
+        });
+      }, error => console.log('Erro ao obter tamanho da imagem:', error));
+    }
+  }, [postData.imagem, windowWidth]);
 
 	// função para buscar os dados do Post
   const fetchPost = async () => {
@@ -157,21 +180,24 @@ const Post = ({ route, navigation }) => {
 		setPostData(prev => ({ ...prev, [field]: value }));
 	};
 
-	// Funções de atualização
+	// Função de atualização
 	const handleTitleSave = () => {
 		updatePostData('title', editableTitle);
 		setTitleModalVisible(false);
 	};
 
+	// Função de atualização
 	const handleDescriptionSave = () => {
 		updatePostData('description', editableDescription);
 		setDescriptionModalVisible(false);
 	};
 
+	// Função de atualização
 	const handleGradeUpdate = (newGrade) => {
 		updatePostData('grade', newGrade);
 	};
 
+	// Função de atualização
 	const toggleCover = (value) => {
 		updatePostData('cover', value);
 	};
@@ -291,8 +317,10 @@ const Post = ({ route, navigation }) => {
       {/* Imagem */}
       <Image
         source={{ uri: postData.imagem }}
-        style={styles.postImage}
-        resizeMode="cover"
+        style={[
+					styles.postImage,
+					{ height: imageSize.height > 0 ? imageSize.height : 450 }
+				]}
       />
 
       {/* Descrição */}
@@ -537,7 +565,6 @@ const styles = StyleSheet.create({
   },
 	postImage: {
 		width: '100%',
-		height: 450,
 		borderRadius: 10,
 	},
 	descriptionInput: {

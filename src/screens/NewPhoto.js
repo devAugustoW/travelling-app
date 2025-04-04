@@ -238,8 +238,7 @@ const NewPhoto = ({ route, navigation }) => {
 						{photoData.image ? (
 							<Image 
 								source={{ uri: photoData.image }} 
-								style={styles.image} 
-								resizeMode="cover"/>
+								style={styles.image}/>
 						) : (
 							<Text style={styles.placeholder}>Nenhuma foto selecionada</Text>
 						)}
@@ -368,6 +367,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 		height: '100%',
 		borderRadius: 30,
+		resizeMode: 'contain',
 	},
 	placeholder: {
 		color: '#FFF',

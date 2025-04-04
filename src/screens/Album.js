@@ -424,8 +424,8 @@ const Album = ({ route }) => {
 								initialRegion={{
 									latitude: album.location.latitude,
 									longitude: album.location.longitude,
-									latitudeDelta: 0.25,
-									longitudeDelta: 0.25,
+									latitudeDelta: 0.45,
+									longitudeDelta: 0.45,
 								}}
 							>
 								<Marker

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, SafeAreaView, KeyboardAvoidingView, ScrollView, FlatList, Platform, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, SafeAreaView, KeyboardAvoidingView, ScrollView, Platform, Text, TouchableOpacity, Image, TextInput, StyleSheet, Alert, useWindowDimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,6 +23,8 @@ const NewPhoto = ({ route, navigation }) => {
 		isCoverPhoto: false,
 		albumId: albumId,
 	});
+	const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+	const windowWidth = useWindowDimensions().width;
 
 	// Recupera o ID do usuário do AsyncStorage
 	useEffect(() => {
@@ -49,12 +51,32 @@ const NewPhoto = ({ route, navigation }) => {
 		fetchUserId();
 	}, []);
 
-	  // Atualizar o estado com a imagem recebida quando o componente montar
-		useEffect(() => {
-			if (photoUri) {
-				updatePhotoData('image', photoUri);
-			}
-		}, [photoUri, updatePhotoData]);
+	// atualiza o estado image com a imagem recebida ao montar componente
+	useEffect(() => {
+		if (photoUri) {
+			updatePhotoData('image', photoUri);
+		}
+	}, [photoUri, updatePhotoData]);
+
+	// Novo useEffect para calcular dimensões da imagem
+	useEffect(() => {
+		if (photoData.image) {
+			Image.getSize(photoData.image, (width, height) => {
+				// Calcule a altura proporcional com base na largura da tela
+				const screenWidth = windowWidth - 20; // Ajuste para padding
+				const scaleFactor = screenWidth / width;
+				const calculatedHeight = height * scaleFactor;
+				
+				// Defina um mínimo e máximo para a altura
+				const finalHeight = Math.min(Math.max(calculatedHeight, 200), 500);
+				
+				setImageSize({
+					width: screenWidth,
+					height: finalHeight
+				});
+			}, error => console.log('Erro ao obter tamanho da imagem:', error));
+		}
+	}, [photoData.image, windowWidth]);
 
 
 	// Função para atualizar campos específicos
@@ -234,7 +256,11 @@ const NewPhoto = ({ route, navigation }) => {
 			>
 				<ScrollView style={styles.scrollContainer}>
 					{/* Área de preview da foto */}
-					<View style={styles.imagePreview}>
+					<View 
+						style={[
+							styles.imagePreview,
+							{ height: imageSize.height > 0 ? imageSize.height : 400 }
+						]}>
 						{photoData.image ? (
 							<Image 
 								source={{ uri: photoData.image }} 
@@ -356,7 +382,6 @@ const styles = StyleSheet.create({
 	},
 	imagePreview: {
 		width: '100%',
-		height: 400,
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: '#333',

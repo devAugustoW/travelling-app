@@ -346,8 +346,8 @@ const Post = ({ route, navigation }) => {
               initialRegion={{
                 latitude: postData.location.latitude,
                 longitude: postData.location.longitude,
-                latitudeDelta: 0.09,
-                longitudeDelta: 0.09,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
               }}
             >
               <Marker
@@ -566,6 +566,7 @@ const styles = StyleSheet.create({
 	postImage: {
 		width: '100%',
 		borderRadius: 10,
+		marginBottom: 5,
 	},
 	descriptionInput: {
 		color: '#FFFFFF',

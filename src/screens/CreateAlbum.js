@@ -70,11 +70,11 @@ const CreateAlbum = () => {
 
 	// lista
   const cost = [
-		{ label: '1k', value: '1k' },
-    { label: '1k - 3k', value: '1k - 3k' },
-    { label: '3k - 5k', value: '3k - 5k' },
-    { label: '5K -10k', value: '5K -10k' },
-		{ label: '+10k', value: '+10k' }
+		{ label: '1K', value: '1K' },
+    { label: '1K - 3K', value: '1K - 3K' },
+    { label: '3K - 5K', value: '3K - 5K' },
+    { label: '5K - 10K', value: '5K - 10K' },
+		{ label: '+10K', value: '+10K' }
   ];
 
 	// pega a localização do usuário

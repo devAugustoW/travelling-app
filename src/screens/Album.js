@@ -339,7 +339,7 @@ const Album = ({ route }) => {
 					)}
 					<View style={styles.coverOverlay}>
 						<TouchableOpacity onPress={() => setTitleModalVisible(true)}>
-              <Text style={styles.albumTitle}>{album.title}</Text>
+              <Text style={styles.albumCoverTitle}>{album.title}</Text>
             </TouchableOpacity>
 
 						<View style={styles.ratingContainer}>
@@ -395,6 +395,7 @@ const Album = ({ route }) => {
 
 				{/* Posts do álbum */}
 				<View style={styles.postsContainer}>
+					<Text style={styles.albumTitle}>Fotos</Text>
           {posts && posts.length > 0 ? (
             posts.map((post, index) => (
               <View 
@@ -431,9 +432,9 @@ const Album = ({ route }) => {
 											onPress={() => openRatingModal(post)}
 										>
 											<Text style={styles.postGrade}>
-											{parseFloat(post.grade || 0.0).toFixed(1)}
+												{parseFloat(post.grade || 0.0).toFixed(1)}
 											</Text>
-											<FontAwesome name="star" size={24} color="#FFD700" />
+											<FontAwesome name="star" size={24} color="#FFD700" marginBottom="5"/>
 										</TouchableOpacity>
 									</View>
                   <Text style={styles.postDescription}>{post.description}</Text>
@@ -460,12 +461,12 @@ const Album = ({ route }) => {
 						<View style={styles.mapWrapper}>
 							<MapView
 								style={styles.map}
-								scrollEnabled={false}
+								scrollEnabled={true}
 								initialRegion={{
 									latitude: album.location.latitude,
 									longitude: album.location.longitude,
-									latitudeDelta: 0.45,
-									longitudeDelta: 0.45,
+									latitudeDelta: 0.99,
+									longitudeDelta: 0.99,
 								}}
 							>
 								<Marker
@@ -505,7 +506,6 @@ const Album = ({ route }) => {
         >
           <Text style={styles.deleteButtonText}>Excluir Álbum</Text>
         </TouchableOpacity>
-
       </ScrollView>
 
 			{/* Componente RatingModal */}
@@ -622,13 +622,13 @@ const styles = StyleSheet.create({
   },
   coverImage: {
     width: '100%',
-    height: 300,
+    height: 250,
 		borderBottomLeftRadius: 30,
 		borderBottomRightRadius: 30,
   },
   coverGradient: {
     width: '100%',
-    height: 300,
+    height: 250,
 		borderBottomLeftRadius: 30,
 		borderBottomRightRadius: 30,
   },
@@ -645,12 +645,20 @@ const styles = StyleSheet.create({
 		zIndex: 100,
 	},
 	albumTitle: {
-		width: '85%',
+		width: '100%',
+		maxWidth: '250',
     color: '#FFF',
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: 'Poppins-Medium',
-		paddingVertical: 5,
+		
   },
+	albumCoverTitle: {
+		width: '100%',
+		maxWidth: '240',
+		color: '#FFF',
+		fontSize: 18,
+		fontFamily: 'Poppins-SemiBold',
+	},
   albumGrade: {
     color: '#FFF',
     fontSize: 20,

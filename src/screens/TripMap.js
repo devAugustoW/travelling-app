@@ -205,8 +205,8 @@ const TripMap = ({ route, navigation }) => {
                 mapRef.current?.animateToRegion({
                   latitude: item.location.latitude,
                   longitude: item.location.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01
+                  latitudeDelta: 0.31,
+                  longitudeDelta: 0.31
                 }, 1000);
               }}
             >

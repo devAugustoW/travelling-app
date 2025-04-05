@@ -242,6 +242,8 @@ const Post = ({ route, navigation }) => {
 						editable={false}
 						placeholder="Título do post"
 						placeholderTextColor="#B1AEAE"
+						multiline={true}
+						numberOfLines={2}
 					/>
 					</TouchableOpacity>
 
@@ -260,7 +262,7 @@ const Post = ({ route, navigation }) => {
         {postData.nameLocation ? (
 					<TouchableOpacity onPress={() => setLocationModalVisible(true)}>
 						<View style={styles.locationContainer}>
-							<Feather name="map-pin" size={20} color="#FFFFFF" />
+							<FontAwesome name="map-marker" size={18} color="#5EDFFF" />
 							<Text style={styles.locationText}>
 								{simplifyLocationName(postData.nameLocation)}
 							</Text>
@@ -271,7 +273,7 @@ const Post = ({ route, navigation }) => {
             style={styles.addLocationButton}
             onPress={() => navigation.navigate('InputPhotoLocation', { postId })}
           >
-            <Feather name="map-pin" size={20} color="#FFFFFF" />
+            <FontAwesome name="map-marker" size={16} color="#5EDFFF" />
             <Text style={styles.addLocationText}>Adicionar localização</Text>
           </TouchableOpacity>
         )}
@@ -343,7 +345,7 @@ const Post = ({ route, navigation }) => {
           <View style={styles.mapContainer}>
             <MapView
               style={styles.map}
-							scrollEnabled={false}
+							scrollEnabled={true}
               initialRegion={{
                 latitude: postData.location.latitude,
                 longitude: postData.location.longitude,
@@ -463,21 +465,24 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 	header: {
-		marginTop: 10,
+		marginTop: 0,
 	},
 	titleContainer: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		paddingTop: 5,
+		marginBottom: 5,
 	},
 	titleInput: {
 		flex: 1,
+		maxWidth: 310,
 		color: '#FFF',
 		fontSize: 20,
 		lineHeight: 20,
 		fontFamily: 'Poppins-SemiBold',
 		paddingBottom: 0,
+		multiline: true,
+		textAlignVertical: 'top',
 	},
 	ratingContainer: {
 		flexDirection: 'row',
@@ -497,7 +502,7 @@ const styles = StyleSheet.create({
 		marginBottom: 15,
 	},
 	locationText: {
-		color: '#ffffff',
+		color: "#5EDFFF",
 		fontSize: 13,
 		fontFamily: 'Poppins-SemiRegular',
 		marginLeft: 5,

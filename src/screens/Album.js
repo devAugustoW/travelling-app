@@ -19,6 +19,7 @@ import { Feather } from '@expo/vector-icons';
 import MapView, { Marker, Polygon  } from 'react-native-maps';
 import axios from 'axios';
 import { API_URL } from '@env';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import RatingModal from '../components/RatingModal';
 
@@ -349,7 +350,7 @@ const Album = ({ route }) => {
 											: album.grade.toFixed(1) 
 										: '0.0'}
 								</Text>
-							<Feather name="star" size={24} color="#FFD700" />
+							<FontAwesome name="star" size={24} color="#FFD700" />
 						</View>
 					</View>
 				</View>
@@ -432,7 +433,7 @@ const Album = ({ route }) => {
 											<Text style={styles.postGrade}>
 											{parseFloat(post.grade || 0.0).toFixed(1)}
 											</Text>
-											<Feather name="star" size={24} color="#FFD700" />
+											<FontAwesome name="star" size={24} color="#FFD700" />
 										</TouchableOpacity>
 									</View>
                   <Text style={styles.postDescription}>{post.description}</Text>

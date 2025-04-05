@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import EditPostModal from '../components/EditPostModal';
 import RatingModal from '../components/RatingModal';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const Post = ({ route, navigation }) => {
   const { postId, albumId } = route.params;
@@ -250,12 +251,12 @@ const Post = ({ route, navigation }) => {
               <Text style={styles.grade}>
 								{postData?.grade ? parseFloat(postData.grade).toFixed(1) : "0.0"}
 							</Text>
-              <Feather name="star" size={24} color="#FFD700" />
+              <FontAwesome name="star" size={24} color="#FFD700" />
             </View>
           </TouchableOpacity>
         </View>
         
-				{/* localização - MODIFICADO */}
+				{/* localização */}
         {postData.nameLocation ? (
 					<TouchableOpacity onPress={() => setLocationModalVisible(true)}>
 						<View style={styles.locationContainer}>

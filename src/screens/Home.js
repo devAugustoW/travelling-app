@@ -36,6 +36,7 @@ const Home = () => {
     { id: '6', name: 'Work', label: 'Trabalho' },
   ];
 
+	/*
   const popularAlbums = [
     {
       id: '1',
@@ -66,6 +67,7 @@ const Home = () => {
       time: '2 km away'
     },
   ];
+	*/
 
 	// Recupera os dados no AsyncStorage
 	useEffect(() => {
@@ -249,8 +251,13 @@ const Home = () => {
 									<Text style={styles.featuredDestination}>{album.destination}</Text>
 								</View>
 								<View style={styles.ratingContainer}>
-									<Text style={styles.rating}>{album.grade || '0.0'}</Text>
-									<MaterialIcons name="star" size={24} color="#FFD700" />
+									<Text style={styles.rating}>{album.grade 
+										? Number.isInteger(album.grade) 
+											? `${album.grade}.0` 
+											: album.grade.toFixed(1) 
+										: '0.0'}
+									</Text>
+									<MaterialIcons name="star" size={25} color="#FFD700" />
 								</View>
 							</View>
 						</TouchableOpacity>
@@ -415,14 +422,14 @@ const styles = StyleSheet.create({
   },  
   ratingContainer: {
 		flexDirection: 'row',
-		gap: 5,
+		gap: 2,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   rating: {
 		fontSize: 20,
     color: '#ffffff',
-    fontFamily: 'Poppins-SemiRegular',
+    fontFamily: 'Poppins-SemiBold',
   },
 });
 

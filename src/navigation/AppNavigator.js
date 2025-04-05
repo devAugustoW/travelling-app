@@ -1,11 +1,12 @@
 import React from 'react';
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_URL } from '@env';
@@ -240,14 +241,54 @@ const AppNavigator = () => {
             presentation: 'fullScreenModal'
           }}
         />
-				<Stack.Screen name="Album" component={Album} />
+				<Stack.Screen 
+					name="Album" 
+					component={Album} 
+					options={() => ({
+						headerShown: true,
+						headerTitle: 'Álbum',
+						headerStyle: {
+							backgroundColor: '#031F2B', 
+							elevation: 0, // Remove sombra no Android
+							shadowOpacity: 0, // Remove sombra no iOS
+							borderBottomWidth: 1,
+							borderBottomColor: '#263238', 
+
+						},
+						headerTitleStyle: {
+							color: '#FFF',
+							fontSize: 20,
+							fontFamily: 'Poppins-Medium',
+						},
+						headerTitleAlign: 'left',
+						headerTintColor: '#5EDFFF', 
+					})}
+				/>
+
 				<Stack.Screen name="NewPhoto" component={NewPhoto} />
 				<Stack.Screen name="InputPhotoLocation" component={InputPhotoLocation} />
 				<Stack.Screen name="InputAlbumLocation" component={InputAlbumLocation} />
-				<Stack.Screen name="Post" component={Post}
-					options={{
-						headerShown: false
-					}}
+				<Stack.Screen 
+					name="Post" 
+					component={Post}
+					options={() => ({
+						headerShown: true,
+						headerTitle: 'Post',
+						headerStyle: {
+							backgroundColor: '#031F2B', 
+							elevation: 0, // Remove sombra no Android
+							shadowOpacity: 0, // Remove sombra no iOS
+							borderBottomWidth: 1,
+							borderBottomColor: '#263238', 
+
+						},
+						headerTitleStyle: {
+							color: '#FFF',
+							fontSize: 20,
+							fontFamily: 'Poppins-Medium',
+						},
+						headerTintColor: '#5EDFFF', 
+					})}				
 				/>
 				<Stack.Screen name="TripMap" component={TripMap} options={{ headerShown: false }} />
       </Stack.Navigator>

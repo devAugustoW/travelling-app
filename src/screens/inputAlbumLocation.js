@@ -37,7 +37,7 @@ const InputAlbumLocation = ({ route, navigation }) => {
     setLoading(true);
 
     try {
-      // Requisição para atualizar a localização do álbum
+      // requisição para atualizar a localização do álbum
       await axios.patch(
         `${API_URL}/albums/${albumId}/location`,
         {
@@ -51,7 +51,7 @@ const InputAlbumLocation = ({ route, navigation }) => {
         }
       );
 
-      // Chama a função de callback para atualizar o estado no Album.js
+      // função de callback para atualizar o estado no Album.js
       if (onLocationSaved) {
         onLocationSaved();
       }
@@ -66,7 +66,7 @@ const InputAlbumLocation = ({ route, navigation }) => {
       console.error('Erro ao salvar localização:', error);
       setLoading(false);
       
-      // Exibe mensagem de erro mais detalhada
+      // exibe mensagem de erro
       const errorMessage = error.response?.data?.message || 'Não foi possível salvar a localização. Tente novamente.';
       Alert.alert('Erro', errorMessage);
     }

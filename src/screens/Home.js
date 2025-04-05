@@ -3,7 +3,7 @@ import axios from 'axios';
 import { API_URL } from '@env';
 import { useState, useEffect } from 'react';
 import { Feather } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -21,53 +21,22 @@ import {
 const Home = () => {
 	const navigation = useNavigation();
 	const [userData, setUserData] = useState(null);
-	const [activeFilter, setActiveFilter] = useState('1');
 	const [userAlbums, setUserAlbums] = useState([]);
 	const [bestPosts, setBestPosts] = useState([]);
+	const [activeFilter, setActiveFilter] = useState(null);
+	const [filteredAlbums, setFilteredAlbums] = useState([]);
+	const [isFiltering, setIsFiltering] = useState(false);
   const [loading, setLoading] = useState(true);
 	
-
   const filters = [
-    { id: '1', name: 'Forest', label: 'Floresta' },
-    { id: '2', name: 'Mountains', label: 'Montanha' },
-    { id: '3', name: 'Beach', label: 'Praia' },
-    { id: '4', name: 'City', label: 'Cidade' },
-    { id: '5', name: 'Diving', label: 'Mergulho' },
-    { id: '6', name: 'Work', label: 'Trabalho' },
-  ];
-
-	/*
-  const popularAlbums = [
-    {
-      id: '1',
-      title: 'Mar Aberto',
-      location: 'Ubatuba',
-      image: require('../assets/images/praia.png'),
-      time: '15 km away'
-    },
-    {
-      id: '2',
-      title: 'Monte Everest',
-      location: 'Nepal',
-      image: require('../assets/images/mountain.png'),
-      time: '2 km away'
-    },
-		{
-      id: '3',
-      title: 'Praia da Barra',
-      location: 'Rio de Janeiro',
-      image: require('../assets/images/praia.png'),
-      time: '2 km away'
-    },
-		{
-      id: '4',
-      title: 'Trilha na Mata',
-      location: 'Chapada Diamantina',
-      image: require('../assets/images/mountain.png'),
-      time: '2 km away'
-    },
-  ];
-	*/
+		{ id: '1', name: 'beach', label: 'Praia', field: 'typeTrip' },
+		{ id: '2', name: 'mountain', label: 'Montanha', field: 'typeTrip' },
+		{ id: '3', name: 'city', label: 'Cidade', field: 'typeTrip' },
+		{ id: '4', name: 'forest', label: 'Floresta', field: 'typeTrip' },
+		{ id: '5', name: 'mergulho', label: 'Mergulho', field: 'tripActivity' },
+		{ id: '6', name: 'pedal', label: 'Pedal', field: 'tripActivity' },
+		{ id: '7', name: 'work', label: 'Trabalho', field: 'typeTrip' },
+	];
 
 	// Recupera os dados no AsyncStorage
 	useEffect(() => {
@@ -147,6 +116,47 @@ const Home = () => {
     }, []) 
   );
 
+	// Função para filtrar os álbuns
+	const handleFilterClick = async (filter) => {
+		
+		try {
+			// desativar filtro se já estiver ativo
+			if (activeFilter === filter.id) {
+				setActiveFilter(null);
+				setIsFiltering(false);
+				return;
+			}
+			
+			setActiveFilter(filter.id);
+			setLoading(true);
+			
+			// busca o token do AsyncStorage
+			const token = await AsyncStorage.getItem('@auth_token');
+
+			// Cria o objeto de parâmetros com o campo correto (typeTrip ou tripActivity)
+			const params = {};
+    	params[filter.field] = filter.name;
+
+			console.log('Enviando filtro:', filter.field, filter.name);
+			console.log('Parâmetros:', params);
+
+			// busca os álbuns filtrados 
+			const response = await axios.get(`${API_URL}/albums/filter`, {
+				headers: { 'Authorization': `Bearer ${token}` },
+				params: params 
+			});
+			
+			setFilteredAlbums(response.data.albums);
+			setIsFiltering(true);
+			setLoading(false);
+			
+		} catch (error) {
+			console.error('Erro ao filtrar álbuns:', error);
+			Alert.alert('Erro', 'Não foi possível carregar os álbuns filtrados');
+			setLoading(false);
+		}
+	};
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -187,7 +197,7 @@ const Home = () => {
 								styles.filterButton,
 								activeFilter === item.id ? styles.filterButtonActive : styles.filterButtonInactive
 							]}
-							onPress={() => setActiveFilter(item.id)}
+							onPress={() => handleFilterClick(item)}
 						>
 							<Text style={[
 								styles.filterText,
@@ -228,41 +238,82 @@ const Home = () => {
           />
         </View>
 
-				{/* Destinos */}
-				<View style={styles.section}>
-          <Text style={styles.sectionTitle}>Destinos</Text>
-          {userAlbums.map((album) => (
-						<TouchableOpacity 
-							key={album._id} 
-							style={styles.featuredCard}
-							onPress={() => navigation.navigate('Album', { albumId: album._id })}
-						>
-							<Image 
-								source={
-									album.cover?.imagem
-										? { uri: album.cover.imagem }
-										: require('../assets/images/placeholder.png')
-								} 
-								style={styles.featuredImage} 
-							/>
-							<View style={styles.featuredInfo}>
-								<View>
-									<Text style={styles.featuredTitle}>{album.title}</Text>
-									<Text style={styles.featuredDestination}>{album.destination}</Text>
-								</View>
-								<View style={styles.ratingContainer}>
-									<Text style={styles.rating}>{album.grade 
-										? Number.isInteger(album.grade) 
-											? `${album.grade}.0` 
-											: album.grade.toFixed(1) 
-										: '0.0'}
-									</Text>
-									<MaterialIcons name="star" size={25} color="#FFD700" />
-								</View>
-							</View>
-						</TouchableOpacity>
-					))}
-        </View>
+				{/* Destinos OU Álbuns Filtrados */}
+					<View style={styles.section}>
+						<Text style={styles.sectionTitle}>{isFiltering ? `Resultados`: 'Destinos'}</Text>
+						
+						{/* Condição de exibição de albums filtrados */}
+						{isFiltering ? (
+							filteredAlbums.length > 0 ? (
+								filteredAlbums.map((album) => (
+									<TouchableOpacity 
+										key={album._id} 
+										style={styles.featuredCard}
+										onPress={() => navigation.navigate('Album', { albumId: album._id })}
+									>
+										<Image 
+											source={
+												album.cover?.imagem
+													? { uri: album.cover.imagem }
+													: require('../assets/images/placeholder.png')
+											} 
+											style={styles.featuredImage} 
+										/>
+										<View style={styles.featuredInfo}>
+											<View>
+												<Text style={styles.featuredTitle}>{album.title}</Text>
+												<Text style={styles.featuredDestination}>{album.destination}</Text>
+											</View>
+											<View style={styles.ratingContainer}>
+												<Text style={styles.rating}>{album.grade 
+													? Number.isInteger(album.grade) 
+														? `${album.grade}.0` 
+														: album.grade.toFixed(1) 
+													: '0.0'}
+												</Text>
+												<FontAwesome name="star" size={25} color="#FFD700" />
+											</View>
+										</View>
+									</TouchableOpacity>
+								))
+							) : (
+								<Text style={styles.noPostsText}>Nenhum álbum encontrado com esse filtro</Text>
+							)
+						) : (
+							/* filtrado: false, mostra a seção de destinos normal */
+							userAlbums.map((album) => (
+								<TouchableOpacity 
+									key={album._id} 
+									style={styles.featuredCard}
+									onPress={() => navigation.navigate('Album', { albumId: album._id })}
+								>
+									<Image 
+										source={
+											album.cover?.imagem
+												? { uri: album.cover.imagem }
+												: require('../assets/images/placeholder.png')
+										} 
+										style={styles.featuredImage} 
+									/>
+									<View style={styles.featuredInfo}>
+										<View>
+											<Text style={styles.featuredTitle}>{album.title}</Text>
+											<Text style={styles.featuredDestination}>{album.destination}</Text>
+										</View>
+										<View style={styles.ratingContainer}>
+											<Text style={styles.rating}>{album.grade 
+												? Number.isInteger(album.grade) 
+													? `${album.grade}.0` 
+													: album.grade.toFixed(1) 
+												: '0.0'}
+											</Text>
+											<FontAwesome name="star" size={25} color="#FFD700" />
+										</View>
+									</View>
+								</TouchableOpacity>
+							))
+						)}
+					</View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -431,6 +482,12 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontFamily: 'Poppins-SemiBold',
   },
+	noPostsText: {
+		color: '#FFF',
+		fontFamily: 'Poppins-Regular',
+		fontSize: 12,
+		textAlign: 'left',
+	},
 });
 
 export default Home;

@@ -15,10 +15,12 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  FlatList
+  FlatList,
+	useWindowDimensions
 } from 'react-native';
 
 const Home = () => {
+	const windowWidth = useWindowDimensions().width;
 	const navigation = useNavigation();
 	const [userData, setUserData] = useState(null);
 	const [userAlbums, setUserAlbums] = useState([]);
@@ -26,6 +28,11 @@ const Home = () => {
 	const [activeFilter, setActiveFilter] = useState(null);
 	const [filteredAlbums, setFilteredAlbums] = useState([]);
 	const [isFiltering, setIsFiltering] = useState(false);
+	const [searchQuery, setSearchQuery] = useState('');
+	const [searchResults, setSearchResults] = useState([]);
+	const [isSearching, setIsSearching] = useState(false);
+	const [searchTimeout, setSearchTimeout] = useState(null);
+	const [imageSizes, setImageSizes] = useState({});
   const [loading, setLoading] = useState(true);
 	
   const filters = [
@@ -54,6 +61,17 @@ const Home = () => {
 
 		getUserData();
 	}, []);
+
+	// useEffect calcular tamanhos de imagens pesquisadas
+	useEffect(() => {
+		if (searchResults && searchResults.length > 0) {
+			searchResults.forEach(post => {
+				if (post.imagem) {
+					calculateImageSize(post.imagem, post._id);
+				}
+			});
+		}
+	}, [searchResults]);
 
 	// Busca os álbuns do usuário
   const fetchUserAlbums = async () => {
@@ -116,9 +134,48 @@ const Home = () => {
     }, []) 
   );
 
+	// Função para fazer a pesquisa nos posts
+	const handleSearch = (text) => {
+		setSearchQuery(text);
+		
+		// limpa o timeout anterior para evitar múltiplas requisições
+		if (searchTimeout) {
+			clearTimeout(searchTimeout);
+		}
+		
+		// se o campo estiver vazio, limpa os resultados
+		if (!text || text.trim() === '') {
+			setIsSearching(false);
+			setSearchResults([]);
+			return;
+		}
+		
+		// requisição para buscar posts da pesquisa
+		const timeout = setTimeout(async () => {
+			try {
+				setIsSearching(true);
+				setLoading(true);
+				
+				const token = await AsyncStorage.getItem('@auth_token');
+				const response = await axios.get(`${API_URL}/posts/search`, {
+					headers: { 'Authorization': `Bearer ${token}` },
+					params: { query: text }
+				});
+				
+				setSearchResults(response.data.posts);
+				setLoading(false);
+
+			} catch (error) {
+				console.error('Erro ao pesquisar posts:', error);
+				setLoading(false);
+			}
+		}, 500);
+		
+		setSearchTimeout(timeout);
+	};
+
 	// Função para filtrar os álbuns
 	const handleFilterClick = async (filter) => {
-		
 		try {
 			// desativar filtro se já estiver ativo
 			if (activeFilter === filter.id) {
@@ -157,6 +214,29 @@ const Home = () => {
 		}
 	};
 
+	// função para calcular o tamanho de imagem pesquisada
+	const calculateImageSize = (imageUrl, postId) => {
+		if (!imageUrl) return;
+		
+		Image.getSize(imageUrl, (width, height) => {
+			// altura proporcional com base na largura disponível
+			const screenWidth = windowWidth - 40; // considerar padding
+			const scaleFactor = screenWidth / width;
+			const calculatedHeight = height * scaleFactor;
+			
+			// mínimo e máximo para a altura
+			const finalHeight = Math.min(Math.max(calculatedHeight, 250), 600);
+			
+			setImageSizes(prev => ({
+				...prev,
+				[postId]: {
+					width: screenWidth,
+					height: finalHeight
+				}
+			}));
+		}, error => console.log('Erro ao obter tamanho da imagem:', error));
+	};
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -175,17 +255,19 @@ const Home = () => {
 					/>
 				</View>
 
-				{/* Pesquisa */}
+				{/* Campo de Pesquisa */}
 				<View style={styles.searchContainer}>
 					<TextInput
 						style={styles.searchInput}
 						placeholder="Pesquisa livre"
 						placeholderTextColor="#664"
+						value={searchQuery}
+    				onChangeText={handleSearch}
 					/>
 					<Feather name="search" size={20} color="#664" style={styles.searchIcon} />
 				</View>
 
-				{/* Filtro */}
+				{/* Filtro de Botões */}
 				<FlatList horizontal
 					showsHorizontalScrollIndicator={false}
 					data={filters}
@@ -238,53 +320,54 @@ const Home = () => {
           />
         </View>
 
-				{/* Destinos OU Álbuns Filtrados */}
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>{isFiltering ? `Resultados`: 'Destinos'}</Text>
-						
-						{/* Condição de exibição de albums filtrados */}
-						{isFiltering ? (
-							filteredAlbums.length > 0 ? (
-								filteredAlbums.map((album) => (
-									<TouchableOpacity 
-										key={album._id} 
-										style={styles.featuredCard}
-										onPress={() => navigation.navigate('Album', { albumId: album._id })}
-									>
-										<Image 
-											source={
-												album.cover?.imagem
-													? { uri: album.cover.imagem }
-													: require('../assets/images/placeholder.png')
-											} 
-											style={styles.featuredImage} 
-										/>
-										<View style={styles.featuredInfo}>
-											<View>
-												<Text style={styles.featuredTitle}>{album.title}</Text>
-												<Text style={styles.featuredDestination}>{album.destination}</Text>
-											</View>
-											<View style={styles.ratingContainer}>
-												<Text style={styles.rating}>{album.grade 
-													? Number.isInteger(album.grade) 
-														? `${album.grade}.0` 
-														: album.grade.toFixed(1) 
-													: '0.0'}
-												</Text>
-												<FontAwesome name="star" size={25} color="#FFD700" />
-											</View>
+				{/* Seção Álbuns OU Pesquisa OU Filtrados */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>
+						{isSearching 
+							? `Resultados da Pesquisa (${searchResults.length})` 
+							: isFiltering 
+								? 'Resultados do Filtro' 
+								: 'Álbuns'
+						}
+					</Text>
+					
+					{/* Condição de exibição: Pesquisando ou Albuns */}
+					{isSearching ? (
+						// exibbe quando está pesquisando
+						searchResults.length > 0 ? (
+							searchResults.map((post) => (
+								<TouchableOpacity 
+									key={post._id} 
+									style={styles.searchResultCard}
+									onPress={() => navigation.navigate('Post', { postId: post._id })}
+								>
+									<Image 
+										source={{ uri: post.imagem }} 
+										style={[
+											styles.searchResultImage,
+											// Usar altura dinâmica se disponível
+											imageSizes[post._id] ? { height: imageSizes[post._id].height } : { aspectRatio: 1 }
+										]}
+									/>
+									<View style={styles.featuredInfo}>
+										<View>
+											<Text style={styles.featuredTitle}>{post.title}</Text>
+											<Text style={styles.featuredDestination}>{post.nameLocation || 'Local não especificado'}</Text>
 										</View>
-									</TouchableOpacity>
-								))
-							) : (
-								<Text style={styles.noPostsText}>Nenhum álbum encontrado com esse filtro</Text>
-							)
+									</View>
+								</TouchableOpacity>
+							))
 						) : (
-							/* filtrado: false, mostra a seção de destinos normal */
-							userAlbums.map((album) => (
+							<Text style={styles.noPostsText}>Nenhum post encontrado com essa pesquisa</Text>
+						)
+					) : isFiltering ? (
+						// exibe quando está filtrando
+						filteredAlbums.length > 0 ? (
+							filteredAlbums.map((album) => (
+								// código filtrando
 								<TouchableOpacity 
 									key={album._id} 
-									style={styles.featuredCard}
+									style={styles.filteredCard}
 									onPress={() => navigation.navigate('Album', { albumId: album._id })}
 								>
 									<Image 
@@ -312,8 +395,45 @@ const Home = () => {
 									</View>
 								</TouchableOpacity>
 							))
-						)}
-					</View>
+						) : (
+							<Text style={styles.noPostsText}>Nenhum álbum encontrado com esse filtro</Text>
+						)
+					) : (
+						// exibe o home normalmente
+						userAlbums.map((album) => (
+							// código dos álbuns
+							<TouchableOpacity 
+								key={album._id} 
+								style={styles.featuredCard}
+								onPress={() => navigation.navigate('Album', { albumId: album._id })}
+							>
+								<Image 
+									source={
+										album.cover?.imagem
+											? { uri: album.cover.imagem }
+											: require('../assets/images/placeholder.png')
+									} 
+									style={styles.featuredImage} 
+								/>
+								<View style={styles.featuredInfo}>
+									<View>
+										<Text style={styles.featuredTitle}>{album.title}</Text>
+										<Text style={styles.featuredDestination}>{album.destination}</Text>
+									</View>
+									<View style={styles.ratingContainer}>
+										<Text style={styles.rating}>{album.grade 
+											? Number.isInteger(album.grade) 
+												? `${album.grade}.0` 
+												: album.grade.toFixed(1) 
+											: '0.0'}
+										</Text>
+										<FontAwesome name="star" size={25} color="#FFD700" />
+									</View>
+								</View>
+							</TouchableOpacity>
+						))
+					)}
+				</View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -426,7 +546,7 @@ const styles = StyleSheet.create({
   },
   albumTitle: {
     color: '#FFF',
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 14,
   },
   albumTime: {
@@ -460,17 +580,17 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		left: 0,
   },
-	featuredDestination: {
-    color: '#FFF',
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 18,
-  },
 	featuredTitle: {
-    color: '#ffffff',
-    fontFamily: 'Poppins-Regular',
+    color: '#fff',
+    fontFamily: 'Poppins-SemiBold',
     fontSize: 14,
 		marginTop: -10,
   },  
+	featuredDestination: {
+    color: '#fff',
+    fontFamily: 'Poppins-Bold',
+    fontSize: 18,
+  },
   ratingContainer: {
 		flexDirection: 'row',
 		gap: 2,
@@ -479,14 +599,39 @@ const styles = StyleSheet.create({
   },
   rating: {
 		fontSize: 20,
-    color: '#ffffff',
+    color: '#fff',
     fontFamily: 'Poppins-SemiBold',
   },
 	noPostsText: {
-		color: '#FFF',
+		color: '#fff',
 		fontFamily: 'Poppins-Regular',
 		fontSize: 12,
 		textAlign: 'left',
+	},
+  searchResultCard: {
+    width: '100%', 
+    marginBottom: 20,
+    borderRadius: 8,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  searchResultImage: {
+    width: '100%',
+    borderRadius: 8,
+    resizeMode: "cover",
+  },
+  filteredCard: {
+    width: '100%',
+    height: 200,
+    marginBottom: 20,
+    borderRadius: 8,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+	searchResultImage: {
+		width: '100%',
+		borderRadius: 8,
+		resizeMode: "cover", 
 	},
 });
 

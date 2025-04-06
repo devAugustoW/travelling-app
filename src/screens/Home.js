@@ -260,11 +260,11 @@ const Home = () => {
 					<TextInput
 						style={styles.searchInput}
 						placeholder="Pesquisa livre"
-						placeholderTextColor="#664"
+						placeholderTextColor="#5EDFFF"
 						value={searchQuery}
     				onChangeText={handleSearch}
 					/>
-					<Feather name="search" size={20} color="#664" style={styles.searchIcon} />
+					<Feather name="search" size={20} color="#5EDFFF" style={styles.searchIcon} />
 				</View>
 
 				{/* Filtro de Botões */}
@@ -345,7 +345,7 @@ const Home = () => {
 										source={{ uri: post.imagem }} 
 										style={[
 											styles.searchResultImage,
-											// Usar altura dinâmica se disponível
+											// altura dinâmica se disponível
 											imageSizes[post._id] ? { height: imageSizes[post._id].height } : { aspectRatio: 1 }
 										]}
 									/>
@@ -473,10 +473,13 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   searchInput: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#263238',
     borderRadius: 8,
     padding: 12,
     fontFamily: 'Poppins-Regular',
+		color: '#5EDFFF',
+		borderColor: '#5EDFFF',
+		borderWidth: 1,
   },
   searchIcon: {
     position: 'absolute',

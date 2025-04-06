@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_URL } from '@env';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL, CLOUD_NAME, CLOUD_UPLOAD_PRESET } from '@env';
 
 const UserProfile = () => {
-	
   const [userData, setUserData] = useState({
     name: '',
     email: '',
@@ -18,7 +18,7 @@ const UserProfile = () => {
   });
 	const [loading, setLoading] = useState(false);
 
-	// resgata os dados do usuário ao carregar a tela
+	// resgata os dados do usuário
   useEffect(() => {
     loadUserData();
   }, []);
@@ -118,6 +118,106 @@ const UserProfile = () => {
     }
   };
 
+  // Função para selecionar imagem de perfil
+  const pickImage = async () => {
+		try {
+			// permissão para acessar a galeria
+			const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+			
+			if (status !== 'granted') {
+				Alert.alert('Permissão necessária', 'Precisamos de permissão para acessar suas fotos.');
+				return;
+			}
+			
+			// seletor de imagem
+			const result = await ImagePicker.launchImageLibraryAsync({
+				mediaTypes: ImagePicker.MediaTypeOptions.Images,
+				allowsEditing: true,
+				aspect: [1, 1],
+				quality: 0.5,
+			});
+			
+			if (!result.canceled && result.assets && result.assets[0]) {
+				setLoading(true);
+				
+				// prepara imagem para upload no Cloudinary
+				const localUri = result.assets[0].uri;
+				const filename = localUri.split('/').pop();
+				
+				// Cria um FormData para o upload
+				const formData = new FormData();
+				formData.append('file', {
+					uri: localUri,
+					type: 'image/jpeg',
+					name: 'profile-image.jpg',
+				});
+				// variável de ambiente para o preset
+				formData.append('upload_preset', CLOUD_UPLOAD_PRESET);
+				formData.append('cloud_name', CLOUD_NAME);
+				
+				// upload para o Cloudinary
+				const cloudinaryResponse = await fetch(
+					`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+					{
+						method: 'POST',
+						body: formData,
+						headers: {
+							'content-type': 'multipart/form-data',
+						},
+					}
+				);
+				
+				// logs para debug
+				if (!cloudinaryResponse.ok) {
+					console.log("Falha na resposta:", await cloudinaryResponse.text());
+					throw new Error('Erro na resposta do Cloudinary');
+				}
+				
+				// pega os dados do Cloudinary
+				const cloudinaryData = await cloudinaryResponse.json();
+				console.log("Resposta do Cloudinary:", cloudinaryData);
+				
+				// validação da URL
+				if (!cloudinaryData.secure_url) {
+					throw new Error('Falha ao fazer upload da imagem para o Cloudinary');
+				}
+				
+				// URL da imagem retornada pelo Cloudinary
+				const imageUrl = cloudinaryData.secure_url;
+				
+				// busca token
+				const token = await AsyncStorage.getItem('@auth_token');
+				
+				// envia a URL para a API
+				const response = await axios.patch(
+					`${API_URL}/user/profile-image`, 
+					{ userImg: imageUrl },
+					{ headers: { 'Authorization': `Bearer ${token}` } }
+				);
+				
+				// atualiza dados do usuário no AsyncStorage
+				const updatedUserData = response.data.user;
+				await AsyncStorage.setItem('@user_data', JSON.stringify(updatedUserData));
+				
+				// atualiza estado local
+				setUserData(prevState => ({
+					...prevState,
+					userImg: updatedUserData.userImg
+				}));
+				
+				Alert.alert('Sucesso', 'Foto de perfil atualizada com sucesso!');
+			}
+
+		} catch (error) {
+			console.error('Erro ao atualizar foto de perfil:', error);
+			Alert.alert('Erro', 'Não foi possível atualizar sua foto de perfil.');
+
+		} finally {
+			setLoading(false);
+
+		}
+	};
+
   return (
     <SafeAreaView style={styles.container}>
 			<ScrollView showsVerticalScrollIndicator={false}>
@@ -125,11 +225,13 @@ const UserProfile = () => {
 
       <View style={styles.profileImageContainer}>
         <Image
-          source={require('../assets/images/profile.jpg')}
+          source={userData.userImg 
+            ? { uri: userData.userImg } 
+            : require('../assets/images/profile.jpg')}
           style={styles.profileImage}
         />
-        <TouchableOpacity style={styles.cameraButton}>
-          <Feather name="camera" size={20} color="#FFF" />
+        <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
+          <FontAwesome name="camera" size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
 

@@ -6,6 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_URL, CLOUD_UPLOAD_PRESET, CLOUD_NAME } from '@env';
 
+
+
 const NewPhoto = ({ route, navigation }) => {
 	const { albumId, photoUri } = route.params || {};
 	const [isLoading, setIsLoading] = useState(false);
@@ -119,14 +121,21 @@ const NewPhoto = ({ route, navigation }) => {
 		data.append('cloud_name', CLOUD_NAME); 
 
 		try {
-			const response = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, data, {
-				headers: {
-					'Content-Type': 'multipart/form-data',
-				},
-			});
+			const response = await fetch(
+				`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+				{
+					method: 'POST',
+					body: data,
+					headers: {
+						'content-type': 'multipart/form-data',
+					},
+				}
+			);
 	
-			const result = response.data;
-			return result; 
+			response.ok ? console.log("Response OK") : console.log("Response failed:", await response.text());
+			const cloudinaryData = await response.json();
+			console.log("Cloudinary response:", cloudinaryData);
+			return cloudinaryData; 
 
 		} catch (error) {
 			console.error('Erro ao fazer upload da imagem:', error);

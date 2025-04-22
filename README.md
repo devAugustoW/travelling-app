@@ -2,7 +2,6 @@
 
 Seu diário de viagens digital para registrar e reviver suas aventuras!
 
-[![Demostração travelling App](https://img.youtube.com/vi/y2XRK0BsTxI/0.jpg)](https://youtu.be/y2XRK0BsTxI)
 
 ## Sobre o Projeto
 
@@ -18,9 +17,6 @@ O `travellingApp` é um aplicativo móvel (desenvolvido com Expo) projetado para
 
     
 ## 📹 Vídeo Demonstrativo
-
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/2MP8GJiPm6c" frameborder="0" allowfullscreen></iframe>
 
 
 

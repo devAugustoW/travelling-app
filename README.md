@@ -15,11 +15,6 @@ O `travellingApp` é um aplicativo móvel (desenvolvido com Expo) projetado para
     *   Faça "check-in" ao chegar no seu destino, capturando automaticamente sua localização GPS ou insira o nome do local via texto.
     *   Visualize todos os seus álbuns organizados na tela inicial.
 
-    
-## 📹 Vídeo Demonstrativo
-
-
-
 *   **Registro Detalhado de Momentos (Posts/Fotos):**
     *   Adicione fotos aos seus álbuns para ilustrar suas memórias.
     *   Edite títulos e descrições para cada foto, contando a história por trás da imagem.

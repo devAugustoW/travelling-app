@@ -2,6 +2,7 @@
 
 Seu diário de viagens digital para registrar e reviver suas aventuras!
 
+[![Video Demo](https://img.youtube.com/vi/TbMI7nmvmwg/0.jpg)](https://www.youtube.com/shorts/TbMI7nmvmwg)
 
 ## Sobre o Projeto
 

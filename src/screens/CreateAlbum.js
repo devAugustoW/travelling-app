@@ -45,18 +45,18 @@ const CreateAlbum = () => {
 
 	// Lista
 	const tripActivities = [
-    { label: 'Caminhada', value: 'Caminhada' },
-    { label: 'Trilha', value: 'Trilha' },
-    { label: 'Mergulho', value: 'Mergulho' },
-    { label: 'Pedal', value: 'Pedal' },
-    { label: 'Desafio', value: 'Desafio' }
+    { label: 'Caminhada', value: 'caminhada' },
+    { label: 'Trilha', value: 'trilha' },
+    { label: 'Mergulho', value: 'mergulho' },
+    { label: 'Pedal', value: 'pedal' },
+    { label: 'Desafio', value: 'desafio' }
   ];
 
 	// Lista
   const difficulty = [
-    { label: 'Fácil', value: 'Fácil' },
-    { label: 'Médio', value: 'Médio' },
-    { label: 'Difícil', value: 'Difícil' }
+    { label: 'Fácil', value: 'fácil' },
+    { label: 'Médio', value: 'médio' },
+    { label: 'Difícil', value: 'difícil' }
   ];
 
 	// lista
@@ -80,7 +80,7 @@ const CreateAlbum = () => {
 	// pega a localização do usuário
 	const getLocation = async () => {
     try {
-      // Solicita permissão para acessar a localização
+      // permissão para acessar a localização
       const { status } = await Location.requestForegroundPermissionsAsync();
       
       if (status !== 'granted') {
@@ -92,7 +92,7 @@ const CreateAlbum = () => {
         return null;
       }
 
-      // Obtém a localização atual
+      // obtém a localização atual
       const location = await Location.getCurrentPositionAsync({});
       return {
         latitude: location.coords.latitude,
@@ -115,7 +115,7 @@ const CreateAlbum = () => {
 	const handleCreateAlbum = async () => {
 		setIsLoading(true);
     try {
-      // Pega o token do AsyncStorage
+      // pega o token do AsyncStorage
       const token = await AsyncStorage.getItem('@auth_token');
       if (!token) {
         Alert.alert('Erro', 'Você precisa estar logado');

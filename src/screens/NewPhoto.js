@@ -6,8 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_URL, CLOUD_UPLOAD_PRESET, CLOUD_NAME } from '@env';
 
-
-
 const NewPhoto = ({ route, navigation }) => {
 	const { albumId, photoUri } = route.params || {};
 	const [isLoading, setIsLoading] = useState(false);
@@ -132,9 +130,9 @@ const NewPhoto = ({ route, navigation }) => {
 				}
 			);
 	
-			response.ok ? console.log("Response OK") : console.log("Response failed:", await response.text());
+			response.ok ? console.log("Cloudinary OK!") : console.log("Response Cloudinary failed:", await response.text());
 			const cloudinaryData = await response.json();
-			console.log("Cloudinary response:", cloudinaryData);
+
 			return cloudinaryData; 
 
 		} catch (error) {

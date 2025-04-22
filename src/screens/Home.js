@@ -19,6 +19,7 @@ import {
 	useWindowDimensions
 } from 'react-native';
 
+
 const Home = () => {
 	const windowWidth = useWindowDimensions().width;
 	const navigation = useNavigation();
@@ -190,12 +191,9 @@ const Home = () => {
 			// busca o token do AsyncStorage
 			const token = await AsyncStorage.getItem('@auth_token');
 
-			// Cria o objeto de parâmetros com o campo correto (typeTrip ou tripActivity)
+			// Cria o objeto de parâmetros com o campo (typeTrip ou tripActivity)
 			const params = {};
-    	params[filter.field] = filter.name;
-
-			console.log('Enviando filtro:', filter.field, filter.name);
-			console.log('Parâmetros:', params);
+    		params[filter.field] = filter.name;
 
 			// busca os álbuns filtrados 
 			const response = await axios.get(`${API_URL}/albums/filter`, {
@@ -322,6 +320,7 @@ const Home = () => {
 
 				{/* Seção Álbuns OU Pesquisa OU Filtrados */}
 				<View style={styles.section}>
+					{/* Condição para exibir texto do título  */}
 					<Text style={styles.sectionTitle}>
 						{isSearching 
 							? `Resultados da Pesquisa (${searchResults.length})` 
@@ -330,7 +329,7 @@ const Home = () => {
 								: 'Álbuns'
 						}
 					</Text>
-					
+
 					{/* Condição de exibição: Pesquisando ou Albuns */}
 					{isSearching ? (
 						// exibbe quando está pesquisando
@@ -399,39 +398,43 @@ const Home = () => {
 							<Text style={styles.noPostsText}>Nenhum álbum encontrado com esse filtro</Text>
 						)
 					) : (
-						// exibe o home normalmente
-						userAlbums.map((album) => (
-							// código dos álbuns
-							<TouchableOpacity 
-								key={album._id} 
-								style={styles.featuredCard}
-								onPress={() => navigation.navigate('Album', { albumId: album._id })}
-							>
-								<Image 
-									source={
-										album.cover?.imagem
-											? { uri: album.cover.imagem }
-											: require('../assets/images/placeholder.png')
-									} 
-									style={styles.featuredImage} 
-								/>
-								<View style={styles.featuredInfo}>
-									<View>
-										<Text style={styles.featuredTitle}>{album.title}</Text>
-										<Text style={styles.featuredDestination}>{album.destination}</Text>
+						// exibe os álbuns normalmente
+						userAlbums.length > 0 ? (
+							userAlbums.map((album) => (
+								// código dos álbuns
+								<TouchableOpacity 
+									key={album._id} 
+									style={styles.featuredCard}
+									onPress={() => navigation.navigate('Album', { albumId: album._id })}
+								>
+									<Image 
+										source={
+											album.cover?.imagem
+												? { uri: album.cover.imagem }
+												: require('../assets/images/placeholder.png')
+										} 
+										style={styles.featuredImage} 
+									/>
+									<View style={styles.featuredInfo}>
+										<View>
+											<Text style={styles.featuredTitle}>{album.title}</Text>
+											<Text style={styles.featuredDestination}>{album.destination}</Text>
+										</View>
+										<View style={styles.ratingContainer}>
+											<Text style={styles.rating}>{album.grade 
+												? Number.isInteger(album.grade) 
+													? `${album.grade}.0` 
+													: album.grade.toFixed(1) 
+												: '0.0'}
+											</Text>
+											<FontAwesome name="star" size={25} color="#FFD700" />
+										</View>
 									</View>
-									<View style={styles.ratingContainer}>
-										<Text style={styles.rating}>{album.grade 
-											? Number.isInteger(album.grade) 
-												? `${album.grade}.0` 
-												: album.grade.toFixed(1) 
-											: '0.0'}
-										</Text>
-										<FontAwesome name="star" size={25} color="#FFD700" />
-									</View>
-								</View>
-							</TouchableOpacity>
-						))
+								</TouchableOpacity>
+							))
+						) : (
+							<Text style={styles.emptyText}>Nenhum álbum postado ainda</Text>
+						)
 					)}
 				</View>
       </ScrollView>
@@ -534,6 +537,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
 		backgroundColor: '#263238',
 		position: 'relative',
+		elevation: 4, 
+    shadowColor: '#fff',
+    shadowRadius: 8,
   },
   albumImage: {
     width: '100%',
@@ -552,6 +558,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold',
     fontSize: 14,
   },
+	emptyText:{
+		color: '#fffc'
+	},
   albumTime: {
     color: '#ffffff',
     fontFamily: 'Poppins-Regular',
@@ -559,13 +568,20 @@ const styles = StyleSheet.create({
     marginTop: -5,
   },
   featuredCard: {
-		width: '100%',
-		height: 150,
-    marginBottom: 15,
+    width: '100%',
+    height: 150,
+    marginBottom: 20,
     borderRadius: 8,
-		marginBottom: 20,
-		overflow: 'hidden',
-		position: 'relative',
+    overflow: 'hidden',
+    position: 'relative',
+    elevation: 5,
+    shadowColor: '#fff',
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   featuredImage: {
     width: '100%',

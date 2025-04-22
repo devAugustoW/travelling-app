@@ -15,9 +15,10 @@ import axios from 'axios';
 import { API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const Login = ({ navigation }) => {
 	const [email, setEmail] = useState('camelo@email.com');
-	const [password, setPassword] = useState('12345');
+	const [password, setPassword] = useState('123456');
 	const [loading, setLoading] = useState(false);
 
 	// função para tratar erros

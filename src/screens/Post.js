@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
+	View,
+	Text,
+	StyleSheet,
+	Image,
+	TextInput,
+	TouchableOpacity,
+	ScrollView,
+	Alert,
 	Modal,
 	useWindowDimensions
 } from 'react-native';
@@ -22,12 +22,13 @@ import EditPostModal from '../components/EditPostModal';
 import RatingModal from '../components/RatingModal';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
+
 const Post = ({ route, navigation }) => {
-  const { postId, albumId } = route.params;
+	const { postId, albumId } = route.params;
 	const windowWidth = useWindowDimensions().width;
 	const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
 
-  const [postData, setPostData] = useState({
+	const [postData, setPostData] = useState({
 		id: null,
 		title: '',
 		description: '',
@@ -38,55 +39,55 @@ const Post = ({ route, navigation }) => {
 		imagem: '',
 		createdAt: null
 	});
-  
-  // Estados de visibilidade de modais
-  const [isTitleModalVisible, setTitleModalVisible] = useState(false);
-  const [isDescriptionModalVisible, setDescriptionModalVisible] = useState(false);
-  const [isRatingModalVisible, setRatingModalVisible] = useState(false);
-  const [isLocationModalVisible, setLocationModalVisible] = useState(false);
 
-	 // Estados de edição
-	 const [editableTitle, setEditableTitle] = useState('');
-	 const [editableDescription, setEditableDescription] = useState('');
-  
-  // Estado de carregamento
-  const [loading, setLoading] = useState(true);
+	// Estados de visibilidade de modais
+	const [isTitleModalVisible, setTitleModalVisible] = useState(false);
+	const [isDescriptionModalVisible, setDescriptionModalVisible] = useState(false);
+	const [isRatingModalVisible, setRatingModalVisible] = useState(false);
+	const [isLocationModalVisible, setLocationModalVisible] = useState(false);
+
+	// Estados de edição
+	const [editableTitle, setEditableTitle] = useState('');
+	const [editableDescription, setEditableDescription] = useState('');
+
+	// Estado de carregamento
+	const [loading, setLoading] = useState(true);
 
 	// carrega os dados do Post
-  useEffect(() => {
-    fetchPost();
-  }, []);
+	useEffect(() => {
+		fetchPost();
+	}, []);
 
 	// calcula dimensões da imagem
-  useEffect(() => {
-    if (postData.imagem) {
-      Image.getSize(postData.imagem, (width, height) => {
-        // altura proporcional com base na largura disponível
-        const screenWidth = windowWidth - 20; // padding
-        const scaleFactor = screenWidth / width;
-        const calculatedHeight = height * scaleFactor;
-        
-        // mínimo e máximo para a altura
-        const finalHeight = Math.min(Math.max(calculatedHeight, 350), 700);
-        
-        setImageSize({
-          width: screenWidth,
-          height: finalHeight
-        });
-      }, error => console.log('Erro ao obter tamanho da imagem:', error));
-    }
-  }, [postData.imagem, windowWidth]);
+	useEffect(() => {
+		if (postData.imagem) {
+			Image.getSize(postData.imagem, (width, height) => {
+				// altura proporcional com base na largura disponível
+				const screenWidth = windowWidth - 20; // padding
+				const scaleFactor = screenWidth / width;
+				const calculatedHeight = height * scaleFactor;
+
+				// mínimo e máximo para a altura
+				const finalHeight = Math.min(Math.max(calculatedHeight, 350), 700);
+
+				setImageSize({
+					width: screenWidth,
+					height: finalHeight
+				});
+			}, error => console.log('Erro ao obter tamanho da imagem:', error));
+		}
+	}, [postData.imagem, windowWidth]);
 
 	// função para buscar os dados do Post
-  const fetchPost = async () => {
-    try {
+	const fetchPost = async () => {
+		try {
 			// busca token no AsyncStorage
-      const token = await AsyncStorage.getItem('@auth_token');
+			const token = await AsyncStorage.getItem('@auth_token');
 
 			// busca dados do post
-      const response = await axios.get(`${API_URL}/posts/${postId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+			const response = await axios.get(`${API_URL}/posts/${postId}`, {
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
 
 			// atualiza o estado postData
 			setPostData({
@@ -105,18 +106,18 @@ const Post = ({ route, navigation }) => {
 			setEditableTitle(response.data.title || '');
 			setEditableDescription(response.data.description || '');
 
-    } catch (error) {
-      console.error('Erro ao buscar post:', error);
-      Alert.alert('Erro', 'Não foi possível carregar os dados do post');
+		} catch (error) {
+			console.error('Erro ao buscar post:', error);
+			Alert.alert('Erro', 'Não foi possível carregar os dados do post');
 
-    } finally {
-      setLoading(false);
-    }
-  };
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	// função para salvar Edição
-  const handleEditSave = async () => {
-    try {
+	const handleEditSave = async () => {
+		try {
 			// busca o token no AsyncStorage
 			const token = await AsyncStorage.getItem('@auth_token');
 
@@ -131,50 +132,51 @@ const Post = ({ route, navigation }) => {
 			}, {
 				headers: { 'Authorization': `Bearer ${token}` }
 			});
-	
+
 			// exibe mensagem de sucesso
 			Alert.alert('Sucesso', 'Post atualizado com sucesso');
 			navigation.goBack();
 
-    } catch (error) {
-			console.error('Erro ao atualizar post:', error);			
-			Alert.alert('Erro',`Não foi possível atualizar o post: ${error}`);
+		} catch (error) {
+			console.error('Erro ao atualizar post:', error);
+			Alert.alert('Erro', `Não foi possível atualizar o post: ${error}`);
 		}
-  };
+	};
 
 	// função deletar post
-  const handleDeletePost = async () => {
+	const handleDeletePost = async () => {
 		// modal de confirmação de exclusão
-    Alert.alert(
-      'Confirmar exclusão',
-      'Tem certeza que deseja excluir este post?',
+		Alert.alert(
+			'Confirmar exclusão',
+			'Tem certeza que deseja excluir este post?',
 
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Excluir', style: 'destructive',
+			[
+				{ text: 'Cancelar', style: 'cancel' },
+				{
+					text: 'Excluir', style: 'destructive',
 					// função para excluir post
-          onPress: async () => {
-            try {
+					onPress: async () => {
+						try {
 							// busca o token no AsyncStorage
-              const token = await AsyncStorage.getItem('@auth_token');
+							const token = await AsyncStorage.getItem('@auth_token');
 
 							// deleta o post
-              await axios.delete(`${API_URL}/posts/${postId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-              });
+							await axios.delete(`${API_URL}/posts/${postId}`, {
+								headers: { 'Authorization': `Bearer ${token}` }
+							});
 
 							// volta para a tela anterior
-              navigation.goBack();
+							navigation.goBack();
 
-            } catch (error) {
-              console.error('Erro ao excluir post:', error);
-              Alert.alert('Erro', 'Não foi possível excluir o post');
-            }
-          }
-        }
-      ]
-    );
-  };
+						} catch (error) {
+							console.error('Erro ao excluir post:', error);
+							Alert.alert('Erro', 'Não foi possível excluir o post');
+						}
+					}
+				}
+			]
+		);
+	};
 
 	// Função para atualizar partes específicas do estado
 	const updatePostData = (field, value) => {
@@ -203,63 +205,63 @@ const Post = ({ route, navigation }) => {
 		updatePostData('cover', value);
 	};
 
-  // Função para simplificar o nome da localização
-  const simplifyLocationName = (fullLocation) => {
-    if (!fullLocation) return '';
-  
+	// Função para simplificar o nome da localização
+	const simplifyLocationName = (fullLocation) => {
+		if (!fullLocation) return '';
+
 		// substitui hífens por vírgulas para uniformizar o processamento
 		const normalizedLocation = fullLocation.replace(/ - /g, ', ');
-		
+
 		// divide por vírgulas
 		const parts = normalizedLocation.split(',');
-		
+
 		// se tiver menos de 2 partes, retorna o texto original
 		if (parts.length < 2) return fullLocation;
-		
+
 		// retorna apenas as duas primeiras partes
 		return `${parts[0].trim()}, ${parts[1].trim()}`;
-  };
+	};
 
-  if (loading || !postData) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.loadingText}>Carregando...</Text>
-      </View>
-    );
-  }
+	if (loading || !postData) {
+		return (
+			<View style={styles.container}>
+				<Text style={styles.loadingText}>Carregando...</Text>
+			</View>
+		);
+	}
 
-  return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
+	return (
+		<ScrollView style={styles.container}>
+			{/* Header */}
+			<View style={styles.header}>
+				<View style={styles.titleContainer}>
 					<TouchableOpacity onPress={() => setTitleModalVisible(true)}>
 
-					{/* título */}
-					<TextInput
-						style={styles.titleInput}
-						value={postData.title}
-						editable={false}
-						placeholder="Título do post"
-						placeholderTextColor="#B1AEAE"
-						multiline={true}
-						numberOfLines={2}
-					/>
+						{/* título */}
+						<TextInput
+							style={styles.titleInput}
+							value={postData.title}
+							editable={false}
+							placeholder="Título do post"
+							placeholderTextColor="#B1AEAE"
+							multiline={true}
+							numberOfLines={2}
+						/>
 					</TouchableOpacity>
 
 					{/* nota */}
-          <TouchableOpacity onPress={() => setRatingModalVisible(true)}> 
-            <View style={styles.ratingContainer}>
-              <Text style={styles.grade}>
+					<TouchableOpacity onPress={() => setRatingModalVisible(true)}>
+						<View style={styles.ratingContainer}>
+							<Text style={styles.grade}>
 								{postData?.grade ? parseFloat(postData.grade).toFixed(1) : "0.0"}
 							</Text>
-              <FontAwesome name="star" size={24} color="#FFD700" />
-            </View>
-          </TouchableOpacity>
-        </View>
-        
+							<FontAwesome name="star" size={24} color="#FFD700" />
+						</View>
+					</TouchableOpacity>
+				</View>
+
 				{/* localização */}
-        {postData.nameLocation ? (
+				{postData.nameLocation ? (
 					<TouchableOpacity onPress={() => setLocationModalVisible(true)}>
 						<View style={styles.locationContainer}>
 							<FontAwesome name="map-marker" size={18} color="#5EDFFF" />
@@ -269,125 +271,125 @@ const Post = ({ route, navigation }) => {
 						</View>
 					</TouchableOpacity>
 				) : (
-          <TouchableOpacity 
-            style={styles.addLocationButton}
-            onPress={() => navigation.navigate('InputPhotoLocation', { postId })}
-          >
-            <FontAwesome name="map-marker" size={16} color="#5EDFFF" />
-            <Text style={styles.addLocationText}>Adicionar localização</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+					<TouchableOpacity
+						style={styles.addLocationButton}
+						onPress={() => navigation.navigate('InputPhotoLocation', { postId })}
+					>
+						<FontAwesome name="map-marker" size={16} color="#5EDFFF" />
+						<Text style={styles.addLocationText}>Adicionar localização</Text>
+					</TouchableOpacity>
+				)}
+			</View>
 
 			{/* modal de confirmação de edição de localização */}
-      <Modal
-        visible={isLocationModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setLocationModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Editar a localização?</Text>
+			<Modal
+				visible={isLocationModalVisible}
+				transparent={true}
+				animationType="slide"
+				onRequestClose={() => setLocationModalVisible(false)}
+			>
+				<View style={styles.modalOverlay}>
+					<View style={styles.modalContainer}>
+						<Text style={styles.modalTitle}>Editar a localização?</Text>
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setLocationModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
+						<View style={styles.modalButtons}>
+							<TouchableOpacity
+								style={styles.cancelButton}
+								onPress={() => setLocationModalVisible(false)}
+							>
+								<Text style={styles.cancelButtonText}>Cancelar</Text>
+							</TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.confirmButton}
-                onPress={() => {
-                  setLocationModalVisible(false);
+							<TouchableOpacity
+								style={styles.confirmButton}
+								onPress={() => {
+									setLocationModalVisible(false);
 
 									// passa o ID do post, função UpdatePhotoData e navega para InputPhotoLocation
-                  navigation.navigate('InputPhotoLocation', { 
+									navigation.navigate('InputPhotoLocation', {
 										postId,
 										updatePhotoData: (field, value) => updatePostData(field, value)
 									});
-                }}
-              >
-                <Text style={styles.confirmButtonText}>Confirmar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+								}}
+							>
+								<Text style={styles.confirmButtonText}>Confirmar</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+			</Modal>
 
-      {/* Imagem */}
-      <Image
-        source={{ uri: postData.imagem }}
-        style={[
+			{/* Imagem */}
+			<Image
+				source={{ uri: postData.imagem }}
+				style={[
 					styles.postImage,
 					{ height: imageSize.height > 0 ? imageSize.height : 450 }
 				]}
-      />
-
-      {/* Descrição */}
-      <TouchableOpacity onPress={() => setDescriptionModalVisible(true)}>
-			<TextInput 
-				style={styles.descriptionInput}
-				value={postData.description}
-				editable={false}
-				placeholder="Descrição do post"
-				placeholderTextColor="#B1AEAE"
-				multiline
 			/>
-      </TouchableOpacity>
 
-      {/* Mapa */}
-      {postData.location && postData.location.latitude && postData.location.longitude && (
-        <>
-          <Text style={styles.mapTitle}>No mapa</Text>
-          <View style={styles.mapContainer}>
-            <MapView
-              style={styles.map}
+			{/* Descrição */}
+			<TouchableOpacity onPress={() => setDescriptionModalVisible(true)}>
+				<TextInput
+					style={styles.descriptionInput}
+					value={postData.description}
+					editable={false}
+					placeholder="Descrição do post"
+					placeholderTextColor="#B1AEAE"
+					multiline
+				/>
+			</TouchableOpacity>
+
+			{/* Mapa */}
+			{postData.location && postData.location.latitude && postData.location.longitude && (
+				<>
+					<Text style={styles.mapTitle}>No mapa</Text>
+					<View style={styles.mapContainer}>
+						<MapView
+							style={styles.map}
 							scrollEnabled={true}
-              initialRegion={{
-                latitude: postData.location.latitude,
-                longitude: postData.location.longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.05,
-              }}
-            >
-              <Marker
-                coordinate={{
-                  latitude: postData.location.latitude,
-                  longitude: postData.location.longitude,
-                }}
-                pinColor="#5EDFFF"
-                description={postData.nameLocation ? simplifyLocationName(postData.nameLocation) : ""}
-              />
-            </MapView>
-          </View>
-        </>
-      )}
+							initialRegion={{
+								latitude: postData.location.latitude,
+								longitude: postData.location.longitude,
+								latitudeDelta: 0.05,
+								longitudeDelta: 0.05,
+							}}
+						>
+							<Marker
+								coordinate={{
+									latitude: postData.location.latitude,
+									longitude: postData.location.longitude,
+								}}
+								pinColor="#5EDFFF"
+								description={postData.nameLocation ? simplifyLocationName(postData.nameLocation) : ""}
+							/>
+						</MapView>
+					</View>
+				</>
+			)}
 
-      {/* Data */}
-      <View style={styles.dateContainer}>
-        <Feather name="map" size={20} color="#5EDFFF" />
-        <Text style={styles.dateText}>
-          {postData.createdAt ? 
-            format(new Date(postData.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : 
-            "Data não disponível"}
-        </Text>
-      </View>
+			{/* Data */}
+			<View style={styles.dateContainer}>
+				<Feather name="map" size={20} color="#5EDFFF" />
+				<Text style={styles.dateText}>
+					{postData.createdAt ?
+						format(new Date(postData.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) :
+						"Data não disponível"}
+				</Text>
+			</View>
 
-      {/* Capa do Álbum */}
-      <View style={styles.coverContainer}>
+			{/* Capa do Álbum */}
+			<View style={styles.coverContainer}>
 				<Text style={styles.coverTitle}>Capa do Álbum</Text>
 				<View style={styles.coverOptions}>
-					<TouchableOpacity 
+					<TouchableOpacity
 						style={[styles.coverOption, postData.cover && styles.coverOptionSelected]}
 						onPress={() => toggleCover(true)}
 					>
 						<Text style={styles.coverOptionText}>Sim</Text>
 					</TouchableOpacity>
 
-					<TouchableOpacity 
+					<TouchableOpacity
 						style={[styles.coverOption, !postData.cover && styles.coverOptionSelected]}
 						onPress={() => toggleCover(false)}
 					>
@@ -396,32 +398,32 @@ const Post = ({ route, navigation }) => {
 				</View>
 			</View>
 
-      {/* Botões */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={styles.cancelButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.saveButton}
-          onPress={handleEditSave}
-        >
-          <Text style={styles.saveButtonText}>Salvar</Text>
-        </TouchableOpacity>
-      </View>
+			{/* Botões */}
+			<View style={styles.buttonContainer}>
+				<TouchableOpacity
+					style={styles.cancelButton}
+					onPress={() => navigation.goBack()}
+				>
+					<Text style={styles.cancelButtonText}>Cancelar</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.saveButton}
+					onPress={handleEditSave}
+				>
+					<Text style={styles.saveButtonText}>Salvar</Text>
+				</TouchableOpacity>
+			</View>
 
-      {/* Botão Excluir */}
-      <TouchableOpacity 
-        style={styles.deleteButton}
-        onPress={handleDeletePost}
-      >
-        <Text style={styles.deleteButtonText}>Excluir Post</Text>
-      </TouchableOpacity>
+			{/* Botão Excluir */}
+			<TouchableOpacity
+				style={styles.deleteButton}
+				onPress={handleDeletePost}
+			>
+				<Text style={styles.deleteButtonText}>Excluir Post</Text>
+			</TouchableOpacity>
 
 			{/* Rating Modal */}
-      <RatingModal
+			<RatingModal
 				visible={isRatingModalVisible}
 				onClose={() => setRatingModalVisible(false)}
 				onSave={handleGradeUpdate}
@@ -429,7 +431,7 @@ const Post = ({ route, navigation }) => {
 			/>
 
 			{/* Edit Title Modal */}
-      <EditPostModal
+			<EditPostModal
 				visible={isTitleModalVisible}
 				onClose={() => setTitleModalVisible(false)}
 				onSave={handleTitleSave}
@@ -438,8 +440,8 @@ const Post = ({ route, navigation }) => {
 				title="Editar título da foto?"
 			/>
 
-      {/* Edit Description Modal */}
-      <EditPostModal
+			{/* Edit Description Modal */}
+			<EditPostModal
 				visible={isDescriptionModalVisible}
 				onClose={() => setDescriptionModalVisible(false)}
 				onSave={handleDescriptionSave}
@@ -447,8 +449,8 @@ const Post = ({ route, navigation }) => {
 				setValue={setEditableDescription}
 				title="Editar descrição da foto?"
 			/>
-    </ScrollView>
-  );
+		</ScrollView>
+	);
 };
 
 
@@ -520,55 +522,55 @@ const styles = StyleSheet.create({
 		marginLeft: 5,
 	},
 	modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    width: '80%',
-    backgroundColor: '#031F2B',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    fontFamily: 'Poppins-Medium',
-    marginBottom: 10,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#263238',
-    borderRadius: 8,
-    marginRight: 5,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: '#5EDFFF',
-    fontSize: 14,
-    fontFamily: 'Poppins-Medium',
-  },
-  confirmButton: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: '#5EDFFF',
-    borderRadius: 8,
-    marginLeft: 5,
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    color: '#031F2B',
-    fontSize: 14,
-    fontFamily: 'Poppins-Medium',
-  },
+		flex: 1,
+		backgroundColor: 'rgba(0, 0, 0, 0.7)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	modalContainer: {
+		width: '80%',
+		backgroundColor: '#031F2B',
+		borderRadius: 10,
+		padding: 20,
+		alignItems: 'center',
+	},
+	modalTitle: {
+		color: '#FFF',
+		fontSize: 18,
+		fontFamily: 'Poppins-Medium',
+		marginBottom: 10,
+	},
+	modalButtons: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		width: '100%',
+	},
+	cancelButton: {
+		flex: 1,
+		padding: 10,
+		backgroundColor: '#263238',
+		borderRadius: 8,
+		marginRight: 5,
+		alignItems: 'center',
+	},
+	cancelButtonText: {
+		color: '#5EDFFF',
+		fontSize: 14,
+		fontFamily: 'Poppins-Medium',
+	},
+	confirmButton: {
+		flex: 1,
+		padding: 10,
+		backgroundColor: '#5EDFFF',
+		borderRadius: 8,
+		marginLeft: 5,
+		alignItems: 'center',
+	},
+	confirmButtonText: {
+		color: '#031F2B',
+		fontSize: 14,
+		fontFamily: 'Poppins-Medium',
+	},
 	postImage: {
 		width: '100%',
 		borderRadius: 10,
@@ -576,14 +578,14 @@ const styles = StyleSheet.create({
 	},
 	descriptionInput: {
 		color: '#FFFFFF',
-		fontSize: 14,
+		fontSize: 15,
 		fontFamily: 'Poppins-Regular',
 		textAlignVertical: 'top',
 		minHeight: 100,
 	},
 	mapTitle: {
 		color: '#FFF',
-		fontSize: 18 ,
+		fontSize: 18,
 		fontFamily: 'Poppins-SemiBold',
 		marginLeft: 5,
 	},

@@ -88,7 +88,6 @@ const InputAlbumLocation = ({ route, navigation }) => {
           fetchDetails={true}
           onPress={(data, details = null) => {
             if (details) {
-              console.log('Local selecionado:', data.description);
               setSelectedLocation({
                 latitude: details.geometry.location.lat,
                 longitude: details.geometry.location.lng,

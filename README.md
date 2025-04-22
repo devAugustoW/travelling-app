@@ -2,6 +2,8 @@
 
 Seu diário de viagens digital para registrar e reviver suas aventuras!
 
+[![Demostração travelling App](https://img.youtube.com/vi/y2XRK0BsTxI/0.jpg)](https://youtu.be/y2XRK0BsTxI)
+
 ## Sobre o Projeto
 
 O `travellingApp` é um aplicativo móvel (desenvolvido com Expo) projetado para ajudar viajantes a organizar, documentar e compartilhar suas experiências pelo mundo. O `travellingApp`, cria álbuns ricos com informações para cada viagem, adicionando fotos, localizações em mapas interativos, descrições, avaliações e muito mais. 
@@ -13,6 +15,14 @@ O `travellingApp` é um aplicativo móvel (desenvolvido com Expo) projetado para
     *   Especifique informações como tipo de viagem (Praia, Montanha, Cidade, etc.), destino, título personalizado, atividade principal, nível de dificuldade, duração e custo estimado.
     *   Faça "check-in" ao chegar no seu destino, capturando automaticamente sua localização GPS ou insira o nome do local via texto.
     *   Visualize todos os seus álbuns organizados na tela inicial.
+
+    
+## 📹 Vídeo Demonstrativo
+
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/2MP8GJiPm6c" frameborder="0" allowfullscreen></iframe>
+
+
 
 *   **Registro Detalhado de Momentos (Posts/Fotos):**
     *   Adicione fotos aos seus álbuns para ilustrar suas memórias.

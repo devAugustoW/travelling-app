@@ -17,8 +17,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const Login = ({ navigation }) => {
-	const [email, setEmail] = useState('camelo@email.com');
-	const [password, setPassword] = useState('123456');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
 	const [loading, setLoading] = useState(false);
 
 	// função para tratar erros
@@ -88,6 +88,41 @@ const Login = ({ navigation }) => {
 		}
 	};
 
+	// função para fazer login como visitante
+	const handleLoginVisitor = async () => {
+		try{
+			setLoading(true);
+         
+			// chamada de login de visitante
+			const response = await axios.post(`${API_URL}/login-visitor`);
+
+			// armazena apenas o token (sem dados do usuário)
+			await AsyncStorage.setItem('@auth_token', response.data.token);
+			await AsyncStorage.setItem('@user_is_visitor', 'true');
+
+			// busca os dados do usuário camelo
+			const userResponse = await axios.get(`${API_URL}/user`, {
+				headers: {
+					'Authorization': `Bearer ${response.data.token}`
+				}
+
+			});
+
+			// armazena os dados do usuário visitante
+			await AsyncStorage.setItem('@user_data', JSON.stringify(userResponse.data.user));
+
+			// redireciona para a tela home
+			navigation.navigate('Home');
+
+		} catch (error) {
+			handleError(error);
+
+		} finally {
+			setLoading(false);
+
+		}
+	}
+
 	return (
 		<SafeAreaView style={styles.container}>
 			<KeyboardAvoidingView
@@ -147,6 +182,16 @@ const Login = ({ navigation }) => {
 						>
 							<Text style={[styles.buttonText, styles.registerButtonText]}>
 								Criar uma conta
+							</Text>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={[styles.button, styles.visitorButton]}
+							onPress={handleLoginVisitor}
+							disabled={loading}
+						>
+							<Text style={[styles.buttonText, styles.visitorButtonText]}>
+								Entrar como visitante
 							</Text>
 						</TouchableOpacity>
 					</View>
@@ -222,7 +267,15 @@ const styles = StyleSheet.create({
 	},
 	buttonDisabled: {
 		opacity: 0.7,
-	}
+	},
+	visitorButton: {
+		backgroundColor: '#5EDFFF',
+		borderWidth: 1,
+		marginTop: 10,
+	},
+	visitorButtonText: {
+		color: '#031F2B',
+	},
 });
 
 export default Login;

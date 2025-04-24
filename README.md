@@ -40,13 +40,12 @@ O `travellingApp` é um aplicativo móvel (desenvolvido com Expo) projetado para
 *   React Navigation
 *   Axios 
 *   AsyncStorage 
-*   JavaScript
 *   API Google Place Auto Complete
 
 
 ## 🔗 Arquitetura do Projeto
 
-Este repositório contém o código frontend do travellingApp. Para uma experiência completa, você também precisará configurar o backend:
+Este repositório contém o código frontend do travellingApp. Para uma experiência completa, poderá usar a API em nuvem ou criar a sua prórpia API:
 
 ### Backend (API)
 
@@ -60,12 +59,12 @@ Siga estas instruções para configurar e rodar o projeto localmente.
 - Node.js (versão 18 ou superior)
 - npm (gerenciador de pacotes do Node.js)
 - Expo Go (aplicativo) instalado no seu dispositivo móvel
-- Conta no [Google Cloud Platform](https://console.cloud.google.com) para API do Places
+- Conta no [Google Cloud Platform](https://console.cloud.google.com) para API do Places Auto Complete
 - Conta no [Cloudinary](https://cloudinary.com) para armazenamento de imagens
 
 ### Executando o Aplicativo
 1. Faça um download do projeto
-2. no terminal, na pasta no projeto, instale as dependências do projeto:
+2. No terminal, na pasta no projeto, instale as dependências do projeto:
 ```bash
 npm install
 ```
@@ -73,19 +72,20 @@ npm install
 3. Configure as variáveis de ambiente:
    - Crie um arquivo `.env` na raiz do projeto
    - Adicione as seguintes variáveis:
+   - A URL da API esta neste endereço: https://travelling-api.onrender.com
 ```env
 GOOGLE_PLACES_API_KEY=sua_chave_do_google_places
 CLOUDINARY_URL=sua_url_do_cloudinary
 CLOUD_NAME=seu_cloud_name
 CLOUD_API_SECRET=sua_api_secreta
 CLOUD_API_KEY=sua_api_key
-API_URL=url_do_backend
+API_URL=https://travelling-api.onrender.com
 ```
 
 ### Executando o Aplicativo
 1. Inicie o servidor de desenvolvimento:
 ```bash
-npx expo start
+npx expo start --clear
 ```
 
 2. Use o aplicativo Expo Go no seu dispositivo móvel para escanear o QR Code que aparecerá no terminal

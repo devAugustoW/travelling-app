@@ -33,6 +33,8 @@ O `travellingApp` é um aplicativo móvel (desenvolvido com Expo) projetado para
     *   Design limpo e focado na experiência do usuário viajante.
     *   Navegação simples entre álbuns, posts e funcionalidades.
 
+https://github.com/user-attachments/assets/b1854009-3afa-417b-ad0d-15df5f8c74e1
+
 ## 🚀 Tecnologias Utilizadas
 
 *   React Native

@@ -31,26 +31,26 @@ const Tab = createBottomTabNavigator();
 
 // Função para buscar o último álbum criado pelo usuário
 const getLastAlbumId = async () => {
-  try {
-    // busca token de autenticação
-    const token = await AsyncStorage.getItem('@auth_token');
-    if (!token) return null;
+	try {
+		// busca token de autenticação
+		const token = await AsyncStorage.getItem('@auth_token');
+		if (!token) return null;
 
-    // requisição para buscar os álbuns do usuário
-    const response = await axios.get(`${API_URL}/user/albums`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+		// requisição para buscar os álbuns do usuário
+		const response = await axios.get(`${API_URL}/user/albums`, {
+			headers: { 'Authorization': `Bearer ${token}` }
+		});
 
-    // verifica se há álbuns e ordena pelo mais recente
-    if (response.data && response.data.albums && response.data.albums.length > 0) {
-      return response.data.albums[0]._id;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Erro ao buscar o último álbum:', error);
-    return null;
-  }
+		// verifica se há álbuns e ordena pelo mais recente
+		if (response.data && response.data.albums && response.data.albums.length > 0) {
+			return response.data.albums[0]._id;
+		}
+
+		return null;
+	} catch (error) {
+		console.error('Erro ao buscar o último álbum:', error);
+		return null;
+	}
 };
 
 
@@ -59,40 +59,40 @@ const TabNavigator = () => {
 	const [activeTab, setActiveTab] = useState('HomeTab');
 	const navigation = useNavigation();
 
-	// Funcionalidade de camera atualizada
+	// Funcionalidade de camera 
 	const openCamera = async () => {
 		try {
 			// solicita permissões
 			const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
 			const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
-			
+
 			if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
 				Alert.alert(
-					'Permissão necessária', 
+					'Permissão necessária',
 					'Precisamos de acesso à câmera e à galeria para tirar e salvar fotos'
 				);
 				return;
 			}
-			
+
 			// sbre a câmera 
 			const result = await ImagePicker.launchCameraAsync({
 				quality: 1,
 				allowsEditing: false,
 			});
-			
+
 			// se usuário tirou uma foto (não cancelou)
 			if (!result.canceled && result.assets && result.assets.length > 0) {
 				const photoUri = result.assets[0].uri;
-				
+
 				// busca o último álbum criado
 				const lastAlbumId = await getLastAlbumId();
-      
+
 				if (lastAlbumId) {
 					// navega para NewPhoto com a URI da foto e ID do álbum
-					navigation.navigate('NewPhoto', { 
+					navigation.navigate('NewPhoto', {
 						photoUri: photoUri,
-						albumId: lastAlbumId 
-					});			
+						albumId: lastAlbumId
+					});
 				} else {
 					// se não houver álbum, perguntar se quer criar um novo
 					Alert.alert(
@@ -135,11 +135,11 @@ const TabNavigator = () => {
 					paddingTop: 8,
 					borderTopLeftRadius: 30,
 					borderTopRightRadius: 30,
-					position: 'absolute', 
-          left: 0,
-          right: 0,
-          bottom: 0,
-          elevation: 0,
+					position: 'absolute',
+					left: 0,
+					right: 0,
+					bottom: 0,
+					elevation: 0,
 				},
 				tabBarActiveTintColor: '#5EDFFF',
 				tabBarInactiveTintColor: '#664',
@@ -147,79 +147,79 @@ const TabNavigator = () => {
 				shadowOpacity: 0, // remove sombra no iOS
 			}}
 		>
-			<Tab.Screen 
-        name="HomeTab" 
-        component={Home}
-        options={{
-          tabBarIcon: ({ }) => (
-            <Feather 
-							name="home" 
-							size={30} 
+			<Tab.Screen
+				name="HomeTab"
+				component={Home}
+				options={{
+					tabBarIcon: ({ }) => (
+						<Feather
+							name="home"
+							size={30}
 							color={activeTab === 'HomeTab' ? '#5EDFFF' : '#B1AEAE'} />
-          ),
-          tabBarLabel: '',
-        }}
+					),
+					tabBarLabel: '',
+				}}
 				listeners={{
-          tabPress: () => setActiveTab('HomeTab'),
-        }}
-      />
-			<Tab.Screen 
-        name="Camera" 
-        component={Home} 
-        options={{
-          tabBarIcon: ({ }) => (
-            <Feather 
-							name="camera" 
-							size={30} 
-							color={'#B1AEAE'} 
+					tabPress: () => setActiveTab('HomeTab'),
+				}}
+			/>
+			<Tab.Screen
+				name="Camera"
+				component={Home}
+				options={{
+					tabBarIcon: ({ }) => (
+						<Feather
+							name="camera"
+							size={30}
+							color={'#B1AEAE'}
 						/>
-          ),
-          tabBarLabel: '',
-        }}
-        listeners={{
-          tabPress: (e) => {
-            // previne a navegação padrão
-            e.preventDefault();
-            openCamera();
-          },
-        }}
-      />
+					),
+					tabBarLabel: '',
+				}}
+				listeners={{
+					tabPress: (e) => {
+						// previne a navegação padrão
+						e.preventDefault();
+						openCamera();
+					},
+				}}
+			/>
 
-			<Tab.Screen 
-        name="CreateAlbumTab" 
-        component={Home}
-        options={{
-          tabBarIcon: ({ }) => (
-            <Feather 
-							name="folder-plus" 
-							size={30} 
+			<Tab.Screen
+				name="CreateAlbumTab"
+				component={Home}
+				options={{
+					tabBarIcon: ({ }) => (
+						<Feather
+							name="folder-plus"
+							size={30}
 							color={activeTab === 'CreateAlbum' ? '#5EDFFF' : '#B1AEAE'} />
-          ),
-          tabBarLabel: '',
-        }}
+					),
+					tabBarLabel: '',
+				}}
 				listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            navigation.navigate('CreateAlbum');
-          },
-        }}
-      />
+					tabPress: (e) => {
+						e.preventDefault();
+						navigation.navigate('CreateAlbum');
+					},
+				}}
+			/>
 
-			<Tab.Screen 
-        name="UserProfile" 
-        component={UserProfile}
-        options={{
-          tabBarIcon: ({ }) => (
-            <Feather 
-							name="user" 
-							size={30} 
+			<Tab.Screen
+				name="UserProfile"
+				component={UserProfile}
+				options={{
+					tabBarIcon: ({ }) => (
+						<Feather
+							name="user"
+							size={30}
 							color={activeTab === 'UserProfile' ? '#5EDFFF' : '#B1AEAE'} />
-          ),
-          tabBarLabel: '',
-        }}
+					),
+					tabBarLabel: '',
+				}}
 				listeners={{
-          tabPress: () => setActiveTab('UserProfile'),
-        }}
+					tabPress: () => setActiveTab('UserProfile'),
+				}}
 			/>
 		</Tab.Navigator>
 	);
@@ -227,32 +227,32 @@ const TabNavigator = () => {
 
 // navegação stack
 const AppNavigator = () => {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+	return (
+		<NavigationContainer>
+			<Stack.Navigator screenOptions={{ headerShown: false }}>
 				<Stack.Screen name="GetStart" component={GetStart} />
-        <Stack.Screen name="Register" component={Register} />
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Home" component={TabNavigator} />
-        <Stack.Screen 
-          name="CreateAlbum" 
-          component={CreateAlbum}
-          options={{
-            presentation: 'fullScreenModal'
-          }}
-        />
-				<Stack.Screen 
-					name="Album" 
-					component={Album} 
+				<Stack.Screen name="Register" component={Register} />
+				<Stack.Screen name="Login" component={Login} />
+				<Stack.Screen name="Home" component={TabNavigator} />
+				<Stack.Screen
+					name="CreateAlbum"
+					component={CreateAlbum}
+					options={{
+						presentation: 'fullScreenModal'
+					}}
+				/>
+				<Stack.Screen
+					name="Album"
+					component={Album}
 					options={() => ({
 						headerShown: true,
 						headerTitle: 'Álbum',
 						headerStyle: {
-							backgroundColor: '#031F2B', 
+							backgroundColor: '#031F2B',
 							elevation: 0, // Remove sombra no Android
 							shadowOpacity: 0, // Remove sombra no iOS
 							borderBottomWidth: 1,
-							borderBottomColor: '#263238', 
+							borderBottomColor: '#263238',
 
 						},
 						headerTitleStyle: {
@@ -261,25 +261,25 @@ const AppNavigator = () => {
 							fontFamily: 'Poppins-Medium',
 						},
 						headerTitleAlign: 'left',
-						headerTintColor: '#5EDFFF', 
+						headerTintColor: '#5EDFFF',
 					})}
 				/>
 
 				<Stack.Screen name="NewPhoto" component={NewPhoto} />
 				<Stack.Screen name="InputPhotoLocation" component={InputPhotoLocation} />
 				<Stack.Screen name="InputAlbumLocation" component={InputAlbumLocation} />
-				<Stack.Screen 
-					name="Post" 
+				<Stack.Screen
+					name="Post"
 					component={Post}
 					options={() => ({
 						headerShown: true,
 						headerTitle: 'Post',
 						headerStyle: {
-							backgroundColor: '#031F2B', 
+							backgroundColor: '#031F2B',
 							elevation: 0, // Remove sombra no Android
 							shadowOpacity: 0, // Remove sombra no iOS
 							borderBottomWidth: 1,
-							borderBottomColor: '#263238', 
+							borderBottomColor: '#263238',
 
 						},
 						headerTitleStyle: {
@@ -287,13 +287,13 @@ const AppNavigator = () => {
 							fontSize: 20,
 							fontFamily: 'Poppins-Medium',
 						},
-						headerTintColor: '#5EDFFF', 
-					})}				
+						headerTintColor: '#5EDFFF',
+					})}
 				/>
 				<Stack.Screen name="TripMap" component={TripMap} options={{ headerShown: false }} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+			</Stack.Navigator>
+		</NavigationContainer>
+	);
 };
 
 export default AppNavigator;

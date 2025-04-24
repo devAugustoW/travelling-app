@@ -34,7 +34,7 @@ const NewPhoto = ({ route, navigation }) => {
 				const userDataString = await AsyncStorage.getItem('@user_data');
 				if (userDataString) {
 					const userData = JSON.parse(userDataString);
-					setUserId(userData._id); 
+					setUserId(userData._id);
 				}
 
 				// Buscar token de autenticação
@@ -66,10 +66,10 @@ const NewPhoto = ({ route, navigation }) => {
 				const screenWidth = windowWidth - 20; // padding
 				const scaleFactor = screenWidth / width;
 				const calculatedHeight = height * scaleFactor;
-				
+
 				// mínimo e máximo para altura
 				const finalHeight = Math.min(Math.max(calculatedHeight, 200), 500);
-				
+
 				setImageSize({
 					width: screenWidth,
 					height: finalHeight
@@ -112,11 +112,11 @@ const NewPhoto = ({ route, navigation }) => {
 		const data = new FormData();
 		data.append('file', {
 			uri: imageUri,
-			type: 'image/jpeg', 
-			name: 'upload.jpg', 
+			type: 'image/jpeg',
+			name: 'upload.jpg',
 		});
-		data.append('upload_preset', CLOUD_UPLOAD_PRESET); 
-		data.append('cloud_name', CLOUD_NAME); 
+		data.append('upload_preset', CLOUD_UPLOAD_PRESET);
+		data.append('cloud_name', CLOUD_NAME);
 
 		try {
 			const response = await fetch(
@@ -129,11 +129,11 @@ const NewPhoto = ({ route, navigation }) => {
 					},
 				}
 			);
-	
+
 			response.ok ? console.log("Cloudinary OK!") : console.log("Response Cloudinary failed:", await response.text());
 			const cloudinaryData = await response.json();
 
-			return cloudinaryData; 
+			return cloudinaryData;
 
 		} catch (error) {
 			console.error('Erro ao fazer upload da imagem:', error);
@@ -160,24 +160,24 @@ const NewPhoto = ({ route, navigation }) => {
 			const imageUrl = cloudinaryResponse.secure_url;
 
 			// prepara os dados para envio
-      const postData = {
-        imagem: imageUrl,
-        title: photoData.title,
-        description: photoData.description,
-        grade: 0,
-        cover: photoData.isCoverPhoto,
-        nameLocation: photoData.nameLocation,
-        location: {
-          latitude: photoData.location.latitude,
-          longitude: photoData.location.longitude,
-        },
-        userId: userId,
-        albumId: photoData.albumId,
-      };
+			const postData = {
+				imagem: imageUrl,
+				title: photoData.title,
+				description: photoData.description,
+				grade: 0,
+				cover: photoData.isCoverPhoto,
+				nameLocation: photoData.nameLocation,
+				location: {
+					latitude: photoData.location.latitude,
+					longitude: photoData.location.longitude,
+				},
+				userId: userId,
+				albumId: photoData.albumId,
+			};
 
 			// envia para a API com o token de autenticação
 			const response = await axios.post(
-				`${API_URL}/posts`, 
+				`${API_URL}/posts`,
 				postData,
 				{
 					headers: {
@@ -207,7 +207,7 @@ const NewPhoto = ({ route, navigation }) => {
 								isCoverPhoto: false,
 								albumId: albumId,
 							});
-							
+
 							// navega de volta para a tela do álbum
 							navigation.navigate('Album', { albumId: photoData.albumId });
 						}
@@ -232,18 +232,18 @@ const NewPhoto = ({ route, navigation }) => {
 	// Função para simplificar nameLocation
 	const simplifyLocationName = (fullLocation) => {
 		if (!fullLocation) return '';
-  
-  	// substitui hífens por vírgulas para uniformizar o processamento
-  	const normalizedLocation = fullLocation.replace(/ - /g, ', ');
-  
-  	// divide por vírgulas
-  	const parts = normalizedLocation.split(',');
-  
-  	// se tiver menos de 2 partes, retorna o texto original
-  	if (parts.length < 2) return fullLocation;
-  
-  	// retorna apenas as duas primeiras partes
-  	return `${parts[0].trim()}, ${parts[1].trim()}`;
+
+		// substitui hífens por vírgulas para uniformizar o processamento
+		const normalizedLocation = fullLocation.replace(/ - /g, ', ');
+
+		// divide por vírgulas
+		const parts = normalizedLocation.split(',');
+
+		// se tiver menos de 2 partes, retorna o texto original
+		if (parts.length < 2) return fullLocation;
+
+		// retorna apenas as duas primeiras partes
+		return `${parts[0].trim()}, ${parts[1].trim()}`;
 	};
 
 
@@ -263,15 +263,15 @@ const NewPhoto = ({ route, navigation }) => {
 			>
 				<ScrollView style={styles.scrollContainer}>
 					{/* Área de preview da foto */}
-					<View 
+					<View
 						style={[
 							styles.imagePreview,
 							{ height: imageSize.height > 0 ? imageSize.height : 400 }
 						]}>
 						{photoData.image ? (
-							<Image 
-								source={{ uri: photoData.image }} 
-								style={styles.image}/>
+							<Image
+								source={{ uri: photoData.image }}
+								style={styles.image} />
 						) : (
 							<Text style={styles.placeholder}>Nenhuma foto selecionada</Text>
 						)}
@@ -294,8 +294,8 @@ const NewPhoto = ({ route, navigation }) => {
 						onPress={navigateToInputPhotoLocation}
 					>
 						<Text style={styles.buttonText} numberOfLines={1} ellipsizeMode="tail">
-							{photoData.nameLocation 
-								? simplifyLocationName(photoData.nameLocation) 
+							{photoData.nameLocation
+								? simplifyLocationName(photoData.nameLocation)
 								: 'Selecionar Localização'
 							}
 						</Text>
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
 		padding: 10,
 		backgroundColor: '#031F2B',
 	},
-	scrollContainer:{},
+	scrollContainer: {},
 	header: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
@@ -437,11 +437,11 @@ const styles = StyleSheet.create({
 		borderColor: '#5EDFFF',
 		backgroundColor: '#263238',
 		paddingVertical: 15,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 30,
-  },
+		paddingHorizontal: 10,
+		borderRadius: 8,
+		alignItems: 'center',
+		marginBottom: 30,
+	},
 	formLabel: {
 		color: '#FFF',
 		fontSize: 16,

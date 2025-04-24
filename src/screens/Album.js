@@ -22,7 +22,6 @@ import { API_URL } from '@env';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import RatingModal from '../components/RatingModal';
 
-console.log(API_URL)
 const Album = ({ route }) => {
   const { albumId } = route.params;
 	const [token, setToken] = useState(null);

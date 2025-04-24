@@ -38,13 +38,11 @@ O `travellingApp` é um aplicativo móvel (desenvolvido com Expo) projetado para
 *   React Native
 *   Expo
 *   React Navigation
-*   Axios (para comunicação com API)
-*   AsyncStorage (para armazenamento local de dados do usuário e token)
+*   Axios 
+*   AsyncStorage 
 *   JavaScript
+*   API Google Place Auto Complete
 
-##  🛠 Projeto em construção
-
-* Assim que finalizar sinalizo as informações de execução do Travelling App
 
 ## 🔗 Arquitetura do Projeto
 
@@ -53,6 +51,63 @@ Este repositório contém o código frontend do travellingApp. Para uma experiê
 ### Backend (API)
 
 [Link para o repositório da API](https://github.com/devAugustoW/travelling-api)
+
+##  🛠 Get Started
+Siga estas instruções para configurar e rodar o projeto localmente.
+
+### Pré-requisitos
+
+- Node.js (versão 18 ou superior)
+- npm (gerenciador de pacotes do Node.js)
+- Expo Go (aplicativo) instalado no seu dispositivo móvel
+- Conta no [Google Cloud Platform](https://console.cloud.google.com) para API do Places
+- Conta no [Cloudinary](https://cloudinary.com) para armazenamento de imagens
+
+### Executando o Aplicativo
+1. Faça um download do projeto
+2. no terminal, na pasta no projeto, instale as dependências do projeto:
+```bash
+npm install
+```
+
+3. Configure as variáveis de ambiente:
+   - Crie um arquivo `.env` na raiz do projeto
+   - Adicione as seguintes variáveis:
+```env
+GOOGLE_PLACES_API_KEY=sua_chave_do_google_places
+CLOUDINARY_URL=sua_url_do_cloudinary
+CLOUD_NAME=seu_cloud_name
+CLOUD_API_SECRET=sua_api_secreta
+CLOUD_API_KEY=sua_api_key
+API_URL=url_do_backend
+```
+
+### Executando o Aplicativo
+1. Inicie o servidor de desenvolvimento:
+```bash
+npx expo start
+```
+
+2. Use o aplicativo Expo Go no seu dispositivo móvel para escanear o QR Code que aparecerá no terminal
+
+### 👥 Modo Visitante
+
+Para explorar o aplicativo sem necessidade de criar uma conta, utilize a opção "Entrar como visitante" na tela de login. Este modo permite que você conheça as principais funcionalidades do aplicativo através de um perfil demonstrativo totalmente populado.
+
+#### O que você pode fazer como visitante:
+- Explorar álbuns de viagem já criados
+- Visualizar fotos e suas localizações no mapa
+- Ver as melhores fotos na página inicial
+- Utilizar filtros de busca por categoria (Praia, Montanha, Cidade, etc.)
+- Pesquisar álbuns e locais específicos
+
+#### Limitações do modo visitante:
+- Não é possível criar novos álbuns
+- Não é possível adicionar ou editar fotos
+- Não é possível excluir conteúdo
+- Não é possível avaliar fotos
+
+> 💡 Para ter acesso a todas as funcionalidades, crie sua própria conta clicando em "Criar uma conta" na tela de login.
 
 ## ✒️ Autor
 Augusto Dantas - @devaugustow
